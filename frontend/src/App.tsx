@@ -1,16 +1,20 @@
 import { useState, useCallback, useEffect } from 'react'
 import './App.css'
 
+import PlaidLink from "./PlaidLink"
+
 import {
   usePlaidLink,
   PlaidLinkOptions,
   PlaidLinkOnSuccess,
   PlaidLinkOnSuccessMetadata,
 } from 'react-plaid-link';
+import jwt_decode from "jwt-decode";
 
 
 function App() {
-  const [token, setToken] = useState(null);
+  const [user, setUser] = useState()
+  const [token, setToken] = useState(undefined);
   // const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,23 +48,55 @@ function App() {
 
   const {open, ready, exit, error} = usePlaidLink(config)
 
+
+  const handleGoogleResponseCallBack = (response: any) => {
+    let userObj: any = jwt_decode(response.credential);
+
+    fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        first_name: userObj.given_name,
+        last_name: userObj.family_name,
+        email: userObj.email,
+        profile_pic_url: userObj.picture,
+      }),
+      credentials: "omit",
+    })
+      .then((res) => {
+        if (res.ok) {
+          setUser(userObj);
+          document.getElementById("signInDiv").hidden = true;
+        }
+      })
+      .catch((err) => console.error(err));
+  };
+
+  function handleSignOut(event: any) {
+    setUser(undefined);
+    document.getElementById("signInDiv").hidden = false;
+  }
+
   useEffect(() => {
-    if(token == null) {
-      createLinkToken()
-    }
-    console.log(ready)
-    if (ready) {
-      open();
-    }
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleGoogleResponseCallBack,
+    });
+
+    google.accounts.id.renderButton(document.getElementById("signInDiv"), {
+      theme: "outline",
+      size: "large",
+    });
   })
 
   return (
     <div className="App">
-      <button onClick={() => open()
-        } disabled={!ready}>
-        <strong>Link account</strong>
-      </button>
-     
+      {user && <button onClick={(e) => handleSignOut(e)}>Sign Out</button>}
+      <div id="signInDiv"></div>
+      {user && <PlaidLink token={token} ready={ready} open={open} />}
     </div>
   )
 }

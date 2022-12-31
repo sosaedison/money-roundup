@@ -14,8 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "preserve"
   },
-  "include": ["src"],
+  "include": ["src", "../frontend/src/environment.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
