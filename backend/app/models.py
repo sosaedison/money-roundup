@@ -23,3 +23,6 @@ class Item(Base):
     user_id: Mapped[str] = Column(ForeignKey("users.id"))
     access_token: Mapped[str] = Column(String)
     active: Mapped[bool] = Column(Boolean, default=True)
+
+    def __str__(self) -> str:
+        return f"Item<{self.id}> | {self.user_id} | {self.access_token} | {self.active}>"
