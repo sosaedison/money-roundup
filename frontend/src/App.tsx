@@ -26,15 +26,32 @@ function App() {
   }, [setToken])
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
-    console.log(`USER ID ON PLAID SUCCESS ${userID}`)
     setLoading(true)
     await fetch("http://127.0.0.1:8000/exchange/public/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ public_token: publicToken, metadata: metadata, user_id: userID }),
-    });
+      body: JSON.stringify({ public_token: publicToken}),
+    })
+    .then(res => res.json())
+    .then((data) => {
+      if (data["access_token_created"] === true) {
+        fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/item`, {
+          "method": "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({user_id: userID, access_token: data["access_token"]})
+        })
+        .then(res => res.json())
+        .then((data) => {
+          if (data["item_created"]) return;
+        })
+        .catch((err) => console.log(err))
+      }
+    })
+    .catch(err => alert("Failed to get access_token"));
   }, [userID])
 
   const onExit = useCallback(async () => {}, [])
@@ -98,7 +115,7 @@ function App() {
 
   return (
     <div className="App">
-      {user && <><button onClick={(e) => handleSignOut(e)}>Sign Out</button> <PlaidLink user={user} token={token} ready={ready} open={open} /> </>}
+      {user && <><button onClick={(e) => handleSignOut(e)}>Sign Out</button> <PlaidLink ready={ready} open={open} /> </>}
       <div id="signInDiv"></div>
     </div>
   )
