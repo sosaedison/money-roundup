@@ -1,48 +1,54 @@
 import asyncio
-from fastapi import APIRouter, Depends, HTTPException
 
-from sqlalchemy.orm import Session
-from models import User, Item
-from plaid_manager import client
 from dependencies import get_db
-
+from fastapi import APIRouter, Depends, HTTPException
+from models import Item, User
 from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.accounts_get_response import AccountsGetResponse
+from plaid_manager import client
+from sqlalchemy.orm import Session
 
-router  = APIRouter(prefix="/account", tags=["Account"])
+router = APIRouter(prefix="/account", tags=["Account"])
+
 
 @router.get("")
 async def get_accounts(user_id: str, session: Session = Depends(get_db)):
-    """
-        - validate the user
-        - if not user, then return error
-        - fetch the access_tokens for active items with that user_id
-        - async fetch accounts info for each access_token
-        - as requests get resolved, build return obj
-        - return data
-    """
     with session.begin():
         user = session.query(User).filter(User.id == user_id)
 
         if not user:
             return HTTPException(status_code=401, detail="User Not Found")
 
-        items = session.query(Item).filter(Item.user_id == user_id).all()
-        access_tokens = [i.access_token for i in items]
+        items: list[Item] = session.query(Item).filter(Item.user_id == user_id).all()
+        access_tokens: list[str] = [i.access_token for i in items]
 
-    raw_data = await fetch_account_data(access_tokens=access_tokens)
-    clean_data = await sanitize_data(raw_data)
+    account_data = []
+    for access_token in access_tokens:
+        request = AccountsGetRequest(access_token=access_token)
+        accounts_response: AccountsGetResponse = client.accounts_get(request)
 
-    print(clean_data)
-    return clean_data
+        res_as_dict = accounts_response.to_dict()
+        formatted_data = format_accounts_response(res_as_dict)
+
+        account_data.append(formatted_data)
+
+    return account_data
+
+
+def format_accounts_response(account_response: dict) -> dict:
+    formatted_data = {"items": []}
+    for account in account_response["accounts"]:
+        formatted_data["items"].append({"name": account["name"]})
+
+    return formatted_data
+
 
 async def fetch_account_data(access_tokens: list):
     if not access_tokens:
         return
 
-    async def fetch_data(access_token:str):
-        request = AccountsGetRequest(
-          access_token=access_token
-        )
+    async def fetch_data(access_token: str):
+        request = AccountsGetRequest(access_token=access_token)
         accounts_response = client.accounts_get(request)
 
         return accounts_response.to_dict()
@@ -57,40 +63,15 @@ async def fetch_account_data(access_tokens: list):
     for task in done:
         data.append(await task)
 
-    """
-    [
-        {
-            items: [
-                {
-                    name: ""
-                    balances: {
-                        available
-                        current
-                },
-            ],
-            active
-        },
-        {
-            items: [
-                {
-                    name: "",
-                    balances: {
-                        available
-                        current
-                    }
-                }
-            ]
-        }
-    ]
-    """
     return data
+
 
 async def sanitize_data(connections):
     # connections = raw_data
     ret = []
     for bank_connection in connections:
         bank_accounts = bank_connection["accounts"]
-        bank_data = {"items":[]}
+        bank_data = {"items": []}
         for account in bank_accounts:
             bank_data["items"].append({"name": account["name"]})
         ret.append(bank_data)
