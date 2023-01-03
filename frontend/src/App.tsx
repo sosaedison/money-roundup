@@ -17,6 +17,7 @@ function App() {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userID, setUserID] = useState("")
+  const [accounts, setAccounts] = useState()
 
   const createLinkToken = useCallback(async () => {
     const response = await fetch("http://127.0.0.1:8000/link/token/create", {});
@@ -100,6 +101,15 @@ function App() {
     document.getElementById("signInDiv").hidden = false;
   }
 
+  const fetchAccounts = useCallback((event: any) => {
+    fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/account?user_id=${userID}`)
+    .then(res => res.json())
+    .then((data) => {
+      console.log(data)
+    })
+    .catch(err => console.error(err))
+  }, [userID])
+
   useEffect(() => {
     /* global google */
     google.accounts.id.initialize({
@@ -115,8 +125,9 @@ function App() {
 
   return (
     <div className="App">
-      {user && <><button onClick={(e) => handleSignOut(e)}>Sign Out</button> <PlaidLink ready={ready} open={open} /> </>}
+      {user && <><button onClick={(e) => handleSignOut(e)}>Sign Out</button> <PlaidLink ready={ready} open={open} /> <button onClick={(e) => fetchAccounts(e)}>Fetch Accounts</button> </>}
       <div id="signInDiv"></div>
+      {}
     </div>
   )
 }
