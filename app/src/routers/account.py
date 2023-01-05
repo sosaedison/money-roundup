@@ -1,11 +1,11 @@
 import asyncio
 
-from dependencies import get_db
+from app.src.dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from models import Item, User
+from app.src.models import Item, User
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_get_response import AccountsGetResponse
-from plaid_manager import client
+from app.src.plaid_manager import client
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/account", tags=["Account"])
@@ -17,7 +17,7 @@ async def get_accounts(user_id: str, session: Session = Depends(get_db)):
         user = session.query(User).filter(User.id == user_id)
 
         if not user:
-            return HTTPException(status_code=401, detail="User Not Found")
+            raise HTTPException(status_code=401, detail="User Not Found")
 
         items: list[Item] = session.query(Item).filter(Item.user_id == user_id).all()
         access_tokens: list[str] = [i.access_token for i in items]
