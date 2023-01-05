@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import token, user
+from routers import token, user, account, item
 
 from base import Base  # Base for models to inherit from
 from database import engine  # Engine to connect to the database
@@ -26,6 +26,8 @@ app.add_middleware(
 # Add Routers to Main FastAPI App
 app.include_router(token.router)
 app.include_router(user.router)
+app.include_router(account.router)
+app.include_router(item.router)
 
 
 @app.get("/")
