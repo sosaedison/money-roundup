@@ -28,19 +28,14 @@ async def get_accounts(user_id: str, session: Session = Depends(get_db)):
         accounts_response: AccountsGetResponse = client.accounts_get(request)
 
         res_as_dict = accounts_response.to_dict()
-        formatted_data = format_accounts_response(res_as_dict)
-
-        account_data.append(formatted_data)
+        format_accounts_response(res_as_dict, account_data)
 
     return account_data
 
 
-def format_accounts_response(account_response: dict) -> dict:
-    formatted_data = {"items": []}
+def format_accounts_response(account_response: dict, account_data: list) -> None:
     for account in account_response["accounts"]:
-        formatted_data["items"].append({"name": account["name"]})
-
-    return formatted_data
+        account_data.append({"name": account["name"]})
 
 
 async def fetch_account_data(access_tokens: list):

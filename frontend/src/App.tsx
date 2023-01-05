@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 import './App.css'
 
 import PlaidLink from "./PlaidLink"
+import AccountItemList from './AccountItemList';
+import { AccountItemType } from './AppTypes';
 
 import {
   usePlaidLink,
@@ -17,7 +19,7 @@ function App() {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userID, setUserID] = useState("")
-  const [accounts, setAccounts] = useState()
+  const [accounts, setAccounts] = useState(Array)
 
   const createLinkToken = useCallback(async () => {
     const response = await fetch("http://127.0.0.1:8000/link/token/create", {});
@@ -47,7 +49,7 @@ function App() {
         })
         .then(res => res.json())
         .then((data) => {
-          if (data["item_created"]) return;
+          if (data["item_created"]) {fetchAccounts()};
         })
         .catch((err) => console.log(err))
       }
@@ -101,14 +103,15 @@ function App() {
     document.getElementById("signInDiv").hidden = false;
   }
 
-  const fetchAccounts = useCallback((event: any) => {
+  const fetchAccounts = () => {
     fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/account?user_id=${userID}`)
     .then(res => res.json())
     .then((data) => {
-      console.log(data)
+      console.log(`data ${data[0]}`)
+      setAccounts(data)
     })
     .catch(err => console.error(err))
-  }, [userID])
+  }
 
   useEffect(() => {
     /* global google */
@@ -125,7 +128,12 @@ function App() {
 
   return (
     <div className="App">
-      {user && <><button onClick={(e) => handleSignOut(e)}>Sign Out</button> <PlaidLink ready={ready} open={open} /> <button onClick={(e) => fetchAccounts(e)}>Fetch Accounts</button> </>}
+      {user && <>
+        <button onClick={(e) => handleSignOut(e)}>Sign Out</button> 
+        <PlaidLink ready={ready} open={open} /> 
+        <button onClick={() => fetchAccounts()}>Fetch Accounts</button> 
+        <AccountItemList accounts={accounts} /> 
+      </>}
       <div id="signInDiv"></div>
       {}
     </div>
