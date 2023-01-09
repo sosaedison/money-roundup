@@ -1,7 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.orm import relationship, Mapped
 from typing import Optional
-from base import Base
+from app.src.base import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -16,6 +17,7 @@ class User(Base):
     def __str__(self) -> str:
         return f"User<{self.first_name} | {self.last_name} | {self.email} | {self.id}>"
 
+
 class Item(Base):
     __tablename__ = "items"
 
@@ -25,4 +27,6 @@ class Item(Base):
     active: Mapped[bool] = Column(Boolean, default=True)
 
     def __str__(self) -> str:
-        return f"Item<{self.id}> | {self.user_id} | {self.access_token} | {self.active}>"
+        return (
+            f"Item<{self.id}> | {self.user_id} | {self.access_token} | {self.active}>"
+        )
