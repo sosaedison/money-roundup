@@ -8,8 +8,9 @@ load_dotenv()
 class Settings(BaseSettings):
     PLAID_SANDBOX_KEY: str = os.getenv("PLAID_SANDBOX_KEY", "")
     PLAID_CLIENT_ID: str = os.getenv("PLAID_CLIENT_ID", "")
-    ENV: str = os.getenv("ENV", "TEST")
+    ENV: str = os.getenv("ENV", "DEV")
     DB_CONNECTION_STRING: str = "sqlite:///moneyroundup.db"
+    DB_ECHO: bool = False
     if ENV == "TEST":
         DB_CONNECTION_STRING: str = "sqlite:///test_moneyroundup.db"
 

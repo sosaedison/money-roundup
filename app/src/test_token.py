@@ -7,7 +7,6 @@ from app.src.schemas import NewUser, LoggedInUser, LinkTokenForUser
 from app.src.base import Base
 from app.src.database import engine
 from app.src.plaid_manager import client as plaid
-from sqlalchemy.orm import registry
 
 
 @fixture(scope="function", autouse=True)

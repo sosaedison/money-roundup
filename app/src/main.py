@@ -11,7 +11,7 @@ from app.src.database import engine  # Engine to connect to the database
 from app.src.fetch_transactions import fetch_transactions
 
 # Recreate the database on app reload
-# Base.metadata.drop_all(bind=engine)
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 # Create the non-blocking Background scheduler
