@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from pytest import fixture
 
-from app.src.main import app
+from moneyroundup.main import app
 
 
 @fixture

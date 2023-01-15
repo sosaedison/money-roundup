@@ -1,8 +1,8 @@
-from app.src.plaid_manager import client
+from plaid_manager import client
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
-from app.src.models import User, Item
-from app.src.dependencies import get_db
+from models import User, Item
+from dependencies import get_db
 from sqlalchemy.orm import Session
 import datetime
 

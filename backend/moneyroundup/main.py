@@ -3,12 +3,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.src.routers import token, user, account, item
+from routers import token, user, account, item
 
-from app.src.base import Base  # Base for models to inherit from
-from app.src.database import engine  # Engine to connect to the database
+from base import Base  # Base for models to inherit from
+from database import engine  # Engine to connect to the database
 
-from app.src.fetch_transactions import fetch_transactions
+from fetch_transactions import fetch_transactions
 
 # Recreate the database on app reload
 Base.metadata.drop_all(bind=engine)

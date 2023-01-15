@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.orm import relationship, Mapped
-from typing import Optional
-from app.src.base import Base
+from base import Base
 
 
 class User(Base):

@@ -1,6 +1,6 @@
 import plaid
 from plaid.api import plaid_api
-from app.src.settings import settings
+from settings import settings
 
 # Available environments are
 # 'Production'

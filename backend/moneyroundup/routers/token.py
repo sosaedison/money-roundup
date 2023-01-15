@@ -12,10 +12,10 @@ from plaid.model.item_public_token_exchange_request import (
     ItemPublicTokenExchangeRequest,
 )
 
-from app.src.plaid_manager import client
-from app.src.dependencies import get_db
-from app.src.models import User
-from app.src.schemas import PublicTokenExchangeBody, UserRequestingLinkToken
+from plaid_manager import client
+from dependencies import get_db
+from models import User
+from schemas import PublicTokenExchangeBody, UserRequestingLinkToken
 
 from sqlalchemy.orm import Session
 
