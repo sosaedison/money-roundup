@@ -1,11 +1,11 @@
 import asyncio
 
-from app.src.dependencies import get_db
+from moneyroundup.dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from app.src.models import Item, User
+from moneyroundup.models import Item, User
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_get_response import AccountsGetResponse
-from app.src.plaid_manager import client
+from moneyroundup.plaid_manager import client
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/account", tags=["Account"])

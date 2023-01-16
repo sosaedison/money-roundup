@@ -1,8 +1,6 @@
 import plaid
 from plaid.api import plaid_api
-from app.src.settings import settings
-
-print(settings.DB_CONNECTION_STRING)
+from moneyroundup.settings import settings
 
 # Available environments are
 # 'Production'

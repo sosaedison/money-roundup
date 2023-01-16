@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends
 
 from sqlalchemy.orm import Session
 
-from app.src.dependencies import get_db
-from app.src.models import Item
-from app.src.schemas import CreateNewItem, NewItemCreated
+from moneyroundup.dependencies import get_db
+from moneyroundup.models import Item
+from moneyroundup.schemas import CreateNewItem, NewItemCreated
 
 
 router = APIRouter(prefix="/item", tags=["Item"])

@@ -3,10 +3,10 @@ from sqlite3 import IntegrityError
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError as SQAIntegrityError
-from app.src.schemas import LoggedInUser, NewUser
+from moneyroundup.schemas import LoggedInUser, NewUser
 
-from app.src.models import User
-from app.src.dependencies import get_db  # Dependency for access to the database
+from moneyroundup.models import User
+from moneyroundup.dependencies import get_db  # Dependency for access to the database
 
 router = APIRouter(prefix="/user", tags=["User"])
 

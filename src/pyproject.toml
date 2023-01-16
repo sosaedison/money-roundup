@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "moneyroundup"
+version = "0.1.0"
+description = "FastAPI backend for moneyroundup application"
+authors = ["Sosa Edison <me@sosaedison.io>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/sosaedison/money-roundup"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.89.1"
+APScheduler = "^3.9.1.post1"
+SQLAlchemy = "^1.4.46"
+uvicorn = "^0.20.0"
+plaid-python = "^11.3.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+pytest = "^7.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
