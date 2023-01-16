@@ -2,7 +2,11 @@ version: '3.4'
 
 services:
   moneyroundup:
-    image: moneyroundupapi
+    image: moneyroundup
     build:
-      context: ./moneyroundup
+      context: ./src
       dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - /src/moneyroundup
