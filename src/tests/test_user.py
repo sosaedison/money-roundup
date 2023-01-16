@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
-from src.schemas import NewUser, LoggedInUser
+from moneyroundup.schemas import NewUser, LoggedInUser
+
 
 def test_user_registration(client: TestClient):
 

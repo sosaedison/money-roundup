@@ -3,10 +3,10 @@ from unittest.mock import patch
 from pytest import fixture
 from fastapi.testclient import TestClient
 
-from src.schemas import NewUser, LoggedInUser, LinkTokenForUser
-from src.base import Base
-from src.database import engine
-from src.plaid_manager import client as plaid
+from moneyroundup.schemas import NewUser, LoggedInUser, LinkTokenForUser
+from moneyroundup.base import Base
+from moneyroundup.database import engine
+from moneyroundup.plaid_manager import client as plaid
 
 
 @fixture(scope="function", autouse=True)

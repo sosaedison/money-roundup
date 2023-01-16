@@ -4,5 +4,5 @@ services:
   moneyroundup:
     image: moneyroundupapi
     build:
-      context: ./app
+      context: ./moneyroundup
       dockerfile: ./Dockerfile

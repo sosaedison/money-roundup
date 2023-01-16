@@ -1,6 +1,6 @@
 import plaid
 from plaid.api import plaid_api
-from settings import settings
+from moneyroundup.settings import settings
 
 # Available environments are
 # 'Production'

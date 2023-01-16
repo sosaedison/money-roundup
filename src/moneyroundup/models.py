@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.orm import relationship, Mapped
-from base import Base
+from moneyroundup.base import Base
 
 
 class User(Base):
