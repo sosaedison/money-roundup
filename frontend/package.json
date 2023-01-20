@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "react-scripts start",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
@@ -15,7 +16,9 @@
     "jwt-decode": "^3.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-plaid-link": "^3.3.2"
+    "react-plaid-link": "^3.3.2",
+    "react-scripts": "^5.0.1",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
