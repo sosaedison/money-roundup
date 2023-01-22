@@ -6,6 +6,12 @@ from moneyroundup.dependencies import get_db
 from sqlalchemy.orm import Session
 import datetime
 
+from moneyroundup.rabbit_manager import RabbitManager
+
+from moneyroundup.settings import settings
+
+rabbit = RabbitManager(host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE)
+
 
 def two_days_ago():
     today = datetime.datetime.now()
@@ -45,5 +51,9 @@ def fetch_transactions():
                     options=TransactionsGetRequestOptions(),
                 )
                 response = client.transactions_get(request)
-                transactions = response
-                print(transactions)
+                total_transactions = response["total_transactions"]
+                print(total_transactions)
+                did_send = rabbit.produce(
+                    f"Your total transactions were {total_transactions}"
+                )
+                print(did_send)
