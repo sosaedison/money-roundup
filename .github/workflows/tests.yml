@@ -24,3 +24,5 @@ jobs:
       - name: Run Tests
         run: |
           pytest -vs
+        env:
+          First_Name: Mona

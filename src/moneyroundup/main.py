@@ -14,22 +14,23 @@ from moneyroundup.rabbit_manager import RabbitManager
 
 from moneyroundup.settings import settings
 
-rabbit = RabbitManager(host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE)
+if settings.ENV != "TEST":
+    rabbit = RabbitManager(host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE)
+
+    # Create the non-blocking Background scheduler
+    scheduler = BackgroundScheduler()
+    # Run the fetch transactions job and run every 24 hours
+    scheduler.add_job(
+        fetch_transactions,
+        "interval",
+        seconds=int(settings.FETCH_TRANSACTIONS_INTERVAL),
+        kwargs={"rabbit": rabbit},
+    )
+    scheduler.start()
 
 # Recreate the database on app reload
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
-
-# Create the non-blocking Background scheduler
-scheduler = BackgroundScheduler()
-# Run the fetch transactions job and run every 24 hours
-scheduler.add_job(
-    fetch_transactions,
-    "interval",
-    seconds=int(settings.FETCH_TRANSACTIONS_INTERVAL),
-    kwargs={"rabbit": rabbit},
-)
-scheduler.start()
 
 # Init the FastAPI app instance
 app = FastAPI()
