@@ -32,7 +32,7 @@ def link_token_create(
     if not u:
         raise HTTPException(status_code=401, detail="User does not exist")
 
-    request = LinkTokenCreateRequest(
+    req = LinkTokenCreateRequest(
         products=[Products("auth"), Products("transactions")],
         client_name="MoneyRoundup",
         country_codes=[CountryCode("US")],
@@ -48,9 +48,10 @@ def link_token_create(
                 )
             )
         ),
-        user=LinkTokenCreateRequestUser(client_user_id=user.user_id),
+        user=LinkTokenCreateRequestUser(client_user_id="testuser"),
     )
-    res = client.link_token_create(request)
+    res = client.link_token_create(req)
+
     return {"link_token": res["link_token"], "user_id": user.user_id}
 
 

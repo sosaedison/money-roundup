@@ -3,7 +3,6 @@ from unittest.mock import patch
 from pytest import fixture
 from fastapi.testclient import TestClient
 
-from moneyroundup.schemas import NewUser, LoggedInUser, LinkTokenForUser
 from moneyroundup.base import Base
 from moneyroundup.database import engine
 from moneyroundup.plaid_manager import client as plaid
@@ -17,16 +16,16 @@ def rest_db():
 
 def test_create_link_token_for_existing_user(client: TestClient):
 
-    new_user: NewUser = {
+    new_user = {
         "email": "sosarocks@test.com",
         "first_name": "Sosa",
         "last_name": "Rocks",
         "profile_pic_url": "http://www.some_cool_pic.com",
     }
 
-    res = client.post("/user", json=new_user)
+    client_res = client.post("/user", json=new_user)
 
-    user: LoggedInUser = res.json()
+    user: dict = client_res.json()
 
     new_user_id = user["user_id"]
     with patch.object(
@@ -34,10 +33,11 @@ def test_create_link_token_for_existing_user(client: TestClient):
         "link_token_create",
         return_value={"link_token": "SIKE"},
     ):
-        res = client.post("/link/token/create", json={"user_id": user["user_id"]})
+        client_res = client.post(
+            "/link/token/create", json={"user_id": user["user_id"]}
+        )
 
-        res: LinkTokenForUser = res.json()
-        print(res)
+        res: dict = client_res.json()
 
     assert res["user_id"] == new_user_id
     assert res["link_token"] == "SIKE"
@@ -45,7 +45,7 @@ def test_create_link_token_for_existing_user(client: TestClient):
 
 def test_create_link_token_for_non_existing_user(client: TestClient):
 
-    new_user: NewUser = {
+    new_user = {
         "email": "sosarocks@test.com",
         "first_name": "Sosa",
         "last_name": "Rocks",

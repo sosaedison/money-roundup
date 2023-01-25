@@ -6,6 +6,8 @@ from moneyroundup.dependencies import get_db
 from sqlalchemy.orm import Session
 import datetime
 
+from moneyroundup.rabbit_manager import RabbitManager
+
 
 def two_days_ago():
     today = datetime.datetime.now()
@@ -19,7 +21,7 @@ def yesterdays_date():
     return yesterday.date()
 
 
-def fetch_transactions():
+def fetch_transactions(rabbit: RabbitManager):
     db_gen = get_db()
     session: Session = next(db_gen)
 
@@ -45,5 +47,5 @@ def fetch_transactions():
                     options=TransactionsGetRequestOptions(),
                 )
                 response = client.transactions_get(request)
-                transactions = response
-                print(transactions)
+                total_transactions = response["total_transactions"]
+                rabbit.produce(f"Your total transactions were {total_transactions}")
