@@ -4,7 +4,7 @@ from moneyroundup.settings import settings
 
 QUEUE = "transactions_summary"
 
-conn = pika.BlockingConnection(pika.ConnectionParameters(settings.RABBIT_HOST))
+conn = pika.BlockingConnection(pika.ConnectionParameters(host=settings.RABBIT_HOST))
 
 channel = conn.channel()
 

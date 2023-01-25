@@ -8,10 +8,6 @@ import datetime
 
 from moneyroundup.rabbit_manager import RabbitManager
 
-from moneyroundup.settings import settings
-
-rabbit = RabbitManager(host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE)
-
 
 def two_days_ago():
     today = datetime.datetime.now()
@@ -25,7 +21,7 @@ def yesterdays_date():
     return yesterday.date()
 
 
-def fetch_transactions():
+def fetch_transactions(rabbit: RabbitManager):
     db_gen = get_db()
     session: Session = next(db_gen)
 
@@ -52,8 +48,4 @@ def fetch_transactions():
                 )
                 response = client.transactions_get(request)
                 total_transactions = response["total_transactions"]
-                print(total_transactions)
-                did_send = rabbit.produce(
-                    f"Your total transactions were {total_transactions}"
-                )
-                print(did_send)
+                rabbit.produce(f"Your total transactions were {total_transactions}")
