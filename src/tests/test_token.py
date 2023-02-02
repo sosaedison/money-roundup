@@ -23,18 +23,19 @@ def test_create_link_token_for_existing_user(client: TestClient):
         "profile_pic_url": "http://www.some_cool_pic.com",
     }
 
-    client_res = client.post("/user", json=new_user)
+    client_res = client.post("/api/user", json=new_user)
 
     user: dict = client_res.json()
 
     new_user_id = user["user_id"]
+
     with patch.object(
         plaid,
         "link_token_create",
         return_value={"link_token": "SIKE"},
     ):
         client_res = client.post(
-            "/link/token/create", json={"user_id": user["user_id"]}
+            "/api/link/token/create", json={"user_id": user["user_id"]}
         )
 
         res: dict = client_res.json()
@@ -59,6 +60,6 @@ def test_create_link_token_for_non_existing_user(client: TestClient):
         "link_token_create",
         return_value={"link_token": "SIKE"},
     ):
-        res = client.post("/link/token/create", json={"user_id": str(uuid4())})
+        res = client.post("/api/link/token/create", json={"user_id": str(uuid4())})
 
     assert res.status_code == 401

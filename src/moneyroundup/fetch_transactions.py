@@ -1,3 +1,4 @@
+from fastapi import Depends
 from moneyroundup.plaid_manager import client
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
@@ -6,7 +7,7 @@ from moneyroundup.dependencies import get_db
 from sqlalchemy.orm import Session
 import datetime
 
-from moneyroundup.rabbit_manager import RabbitManager
+from moneyroundup.rabbit_manager import QueueManager
 
 
 def two_days_ago():
@@ -21,31 +22,36 @@ def yesterdays_date():
     return yesterday.date()
 
 
-def fetch_transactions(rabbit: RabbitManager):
-    db_gen = get_db()
-    session: Session = next(db_gen)
+def fetch_transactions(access_token: str) -> int:
 
-    # for each user, fetch all active access tokens
+    request = TransactionsGetRequest(
+        access_token=access_token,
+        start_date=two_days_ago(),
+        end_date=yesterdays_date(),
+        options=TransactionsGetRequestOptions(),
+    )
+    response = client.transactions_get(request)
+    total_transactions = response["total_transactions"]
+
+    return total_transactions
+
+
+def populate_queue_with_transactions(
+    rabbit: QueueManager, session: Session = Depends(get_db)
+):
+
     with session.begin():
         users: list[User] = session.query(User).all()
 
-    #   for each token, fetch transactions
-    #       from the last 24 hours and sum
-    with session.begin():
         for user in users:
 
             items: list[Item] = (
                 session.query(Item).filter(Item.user_id == user.id).all()
             )
-            access_tokens = [item.access_token for item in items]
+            access_tokens: list[str] = [str(item.access_token) for item in items]
 
+            total_transactions = 0
             for access_token in access_tokens:
-                request = TransactionsGetRequest(
-                    access_token=access_token,
-                    start_date=two_days_ago(),
-                    end_date=yesterdays_date(),
-                    options=TransactionsGetRequestOptions(),
-                )
-                response = client.transactions_get(request)
-                total_transactions = response["total_transactions"]
-                rabbit.produce(f"Your total transactions were {total_transactions}")
+                total_transactions += fetch_transactions(access_token=access_token)
+
+            rabbit.produce(f"The total of your transactions was ${total_transactions}.")

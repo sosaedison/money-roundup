@@ -1,39 +1,24 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from moneyroundup.routers import token, user, account, item
+from moneyroundup import setup_app
+
+from moneyroundup.api import api
 
 from moneyroundup.base import Base  # Base for models to inherit from
 from moneyroundup.database import engine  # Engine to connect to the database
 
-from moneyroundup.fetch_transactions import fetch_transactions
-
-from moneyroundup.rabbit_manager import RabbitManager
-
 from moneyroundup.settings import settings
 
-if settings.ENV != "TEST":
-    rabbit = RabbitManager(host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE)
-
-    # Create the non-blocking Background scheduler
-    scheduler = BackgroundScheduler()
-    # Run the fetch transactions job and run every 24 hours
-    scheduler.add_job(
-        fetch_transactions,
-        "interval",
-        seconds=int(settings.FETCH_TRANSACTIONS_INTERVAL),
-        kwargs={"rabbit": rabbit},
-    )
-    scheduler.start()
+# Initialize application deps like RabbitMQ
+setup_app()
 
 # Recreate the database on app reload
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 # Init the FastAPI app instance
-app = FastAPI()
+app = FastAPI(title=settings.PROJECT_TITLE)
 
 origins = ["*"]
 
@@ -46,12 +31,9 @@ app.add_middleware(
 )
 
 # Add Routers to Main FastAPI App
-app.include_router(token.router)
-app.include_router(user.router)
-app.include_router(account.router)
-app.include_router(item.router)
+app.include_router(api.api_router, prefix="/api")
 
 
-@app.get("/status")
+@app.get("/api/status")
 def home():
     return {"online": True}
