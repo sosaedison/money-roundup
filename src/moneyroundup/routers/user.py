@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import uuid4
 from sqlite3 import IntegrityError
 from fastapi import APIRouter, Depends
@@ -22,7 +23,7 @@ def register(new_user: NewUser, session: Session = Depends(get_db)):
 
     except (IntegrityError, SQAIntegrityError) as ex:
         with session.begin():
-            u: User = session.query(User).filter(User.email == new_user.email).first()
+            u: Any = session.query(User).filter(User.email == new_user.email).first()
 
     return {
         "user_id": u.id,

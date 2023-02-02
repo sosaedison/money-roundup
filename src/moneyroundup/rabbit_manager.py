@@ -1,7 +1,26 @@
-from typing import Tuple
+from typing import Protocol
 from pika import BlockingConnection, ConnectionParameters
-from pika.spec import BasicProperties
-from pika.spec import Basic
+
+
+class QueueManager(Protocol):
+    def consume(self) -> str:
+        """Consume a message from the queue.
+
+        Returns:
+            str: The message consumed from the queue.
+        """
+        ...
+
+    def produce(self, body: str) -> bool:
+        """Produce a message to the queue.
+
+        Args:
+            body (str): The message to be produced.
+
+        Returns:
+            bool: True if the message was produced successfully.
+        """
+        ...
 
 
 class RabbitManager:
@@ -13,9 +32,7 @@ class RabbitManager:
 
     def consume(self) -> str:
         BODY = 2
-        message: Tuple[
-            Basic.GetOk | None, BasicProperties | None, bytes | None
-        ] = self.channel.basic_get(self.queue, auto_ack=True)
+        message = self.channel.basic_get(self.queue, auto_ack=True)
 
         return str(message[BODY])
 

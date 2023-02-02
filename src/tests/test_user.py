@@ -10,9 +10,9 @@ def test_user_registration(client: TestClient):
         "profile_pic_url": "http://www.some_cool_pic.com",
     }
 
-    client_res = client.post("/user", json=new_user)
+    client_res = client.post("/api/user", json=new_user)
 
-    res: dict = client_res.json()
+    res = client_res.json()
 
     assert "user_id" in list(res.keys())
 
@@ -26,7 +26,7 @@ def test_user_login(client: TestClient):
         "profile_pic_url": "http://www.some_cool_pic.com",
     }
 
-    client_res = client.post("/user", json=new_user)
+    client_res = client.post("/api/user", json=new_user)
 
     res: dict = client_res.json()
 
@@ -34,7 +34,7 @@ def test_user_login(client: TestClient):
 
     assert "user_id" in list(res.keys())  # successful registration
 
-    client_res = client.post("/user", json=res)
+    client_res = client.post("/api/user", json=res)
 
     res = client_res.json()
 
