@@ -1,13 +1,13 @@
-import sys
 import logging
+import sys
 from datetime import datetime
 
-from moneyroundup.settings import settings
+from apscheduler.schedulers.background import BackgroundScheduler
+from pika.exceptions import AMQPConnectionError
+
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
 from moneyroundup.rabbit_manager import RabbitManager
-
-from pika.exceptions import AMQPConnectionError
-from apscheduler.schedulers.background import BackgroundScheduler
+from moneyroundup.settings import settings
 
 logging.basicConfig(
     filename=f"moneyroundup-{datetime.now().strftime('%m-%d-%Y')}.log",
