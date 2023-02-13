@@ -1,13 +1,15 @@
-from fastapi import Depends
-from moneyroundup.plaid_manager import client
-from plaid.model.transactions_get_request import TransactionsGetRequest
-from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
-from moneyroundup.models import User, Item
-from moneyroundup.dependencies import get_db
-from sqlalchemy.orm import Session
 import datetime
 
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
+from sqlalchemy.orm import Session
+
+from moneyroundup.dependencies import get_db
+from moneyroundup.models import Item, User
+from moneyroundup.plaid_manager import client
 from moneyroundup.rabbit_manager import QueueManager
+
+db = get_db()
 
 
 def two_days_ago():
@@ -36,9 +38,7 @@ def fetch_transactions(access_token: str) -> int:
     return total_transactions
 
 
-def populate_queue_with_transactions(
-    rabbit: QueueManager, session: Session = Depends(get_db)
-):
+def populate_queue_with_transactions(rabbit: QueueManager, session: Session = next(db)):
 
     with session.begin():
         users: list[User] = session.query(User).all()
