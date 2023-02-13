@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from plaid.model.country_code import CountryCode
 from plaid.model.depository_account_subtype import DepositoryAccountSubtype
@@ -11,18 +14,19 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.products import Products
 
+from moneyroundup.dependencies import validate_creds
 from moneyroundup.plaid_manager import client
-from moneyroundup.schemas import PublicTokenExchangeBody
-from moneyroundup.setup_auth import validate_creds
+from moneyroundup.schemas import DecodedJWT, PublicTokenExchangeBody
 
 router = APIRouter(tags=["Link Token"])
 
 
 @router.post("/link/token/create")
 def link_token_create(
-    token: str = Depends(validate_creds),
+    token: dict[str, Any] = Depends(validate_creds),
 ):
-
+    print(datetime.fromtimestamp(token["exp"]))
+    print(token)
     req = LinkTokenCreateRequest(
         products=[Products("auth"), Products("transactions")],
         client_name="MoneyRoundup",
