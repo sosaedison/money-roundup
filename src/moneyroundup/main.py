@@ -2,12 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from moneyroundup import setup_app
-
 from moneyroundup.api import api
-
 from moneyroundup.base import Base  # Base for models to inherit from
 from moneyroundup.database import engine  # Engine to connect to the database
-
 from moneyroundup.settings import settings
 
 # Initialize application deps like RabbitMQ
