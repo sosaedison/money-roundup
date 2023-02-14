@@ -8,6 +8,17 @@ class NewUser(BaseModel):
     profile_pic_url: str | None = None
 
 
+class UserFromDB(BaseModel):
+    id: str
+    email: str
+    first_name: str
+    last_name: str
+    profile_pic_url: str | None = None
+
+    class Config:
+        orm_mode = True
+
+
 class LoggedInUser(BaseModel):
     email: str
     first_name: str
