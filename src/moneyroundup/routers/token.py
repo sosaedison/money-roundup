@@ -1,7 +1,4 @@
-from datetime import datetime
-from typing import Any
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from plaid.model.country_code import CountryCode
 from plaid.model.depository_account_subtype import DepositoryAccountSubtype
 from plaid.model.depository_account_subtypes import DepositoryAccountSubtypes
@@ -14,19 +11,20 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.products import Products
 
-from moneyroundup.dependencies import validate_creds
+from moneyroundup.dependencies import get_current_user
 from moneyroundup.plaid_manager import client
-from moneyroundup.schemas import DecodedJWT, PublicTokenExchangeBody
+from moneyroundup.schemas import PublicTokenExchangeBody, UserFromDB
 
 router = APIRouter(tags=["Link Token"])
 
 
 @router.post("/link/token/create")
 def link_token_create(
-    token: dict[str, Any] = Depends(validate_creds),
+    user: UserFromDB | None = Depends(get_current_user),
 ):
-    print(datetime.fromtimestamp(token["exp"]))
-    print(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="User Not Found")
+
     req = LinkTokenCreateRequest(
         products=[Products("auth"), Products("transactions")],
         client_name="MoneyRoundup",
