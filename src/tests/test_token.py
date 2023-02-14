@@ -1,11 +1,15 @@
-from uuid import uuid4
+from typing import Any
 from unittest.mock import patch
-from pytest import fixture
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
+from jose import jwt
+from pytest import fixture
 
 from moneyroundup.base import Base
 from moneyroundup.database import engine
 from moneyroundup.plaid_manager import client as plaid
+from moneyroundup.settings import settings
 
 
 @fixture(scope="function", autouse=True)
@@ -23,11 +27,7 @@ def test_create_link_token_for_existing_user(client: TestClient):
         "profile_pic_url": "http://www.some_cool_pic.com",
     }
 
-    client_res = client.post("/api/user", json=new_user)
-
-    user: dict = client_res.json()
-
-    new_user_id = user["user_id"]
+    reg_res = client.post("/api/user", json=new_user)
 
     with patch.object(
         plaid,
@@ -35,13 +35,13 @@ def test_create_link_token_for_existing_user(client: TestClient):
         return_value={"link_token": "SIKE"},
     ):
         client_res = client.post(
-            "/api/link/token/create", json={"user_id": user["user_id"]}
+            "/api/link/token/create",
+            headers={"Authorization": f"Bearer {reg_res.json()['access_token']}"},
         )
 
         res: dict = client_res.json()
 
-    assert res["user_id"] == new_user_id
-    assert res["link_token"] == "SIKE"
+        assert res["link_token"] == "SIKE"
 
 
 def test_create_link_token_for_non_existing_user(client: TestClient):
