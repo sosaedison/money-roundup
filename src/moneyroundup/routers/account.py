@@ -1,25 +1,29 @@
 import asyncio
 
-from moneyroundup.dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from moneyroundup.models import Item, User
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_get_response import AccountsGetResponse
-from moneyroundup.plaid_manager import client
 from sqlalchemy.orm import Session
+
+from moneyroundup.dependencies import get_current_user, get_db
+from moneyroundup.models import Item, User
+from moneyroundup.plaid_manager import client
+from moneyroundup.schemas import UserFromDB
 
 router = APIRouter(prefix="/account", tags=["Account"])
 
 
 @router.get("")
-async def get_accounts(user_id: str, session: Session = Depends(get_db)):
+async def get_accounts(
+    session: Session = Depends(get_db),
+    user: UserFromDB | None = Depends(get_current_user),
+):
+    if not user:
+        raise HTTPException(status_code=401, detail="User Not Found")
+
     with session.begin():
-        user = session.query(User).filter(User.id == user_id)
 
-        if not user:
-            raise HTTPException(status_code=401, detail="User Not Found")
-
-        items: list[Item] = session.query(Item).filter(Item.user_id == user_id).all()
+        items = session.query(Item).filter(Item.user_id == user.id).all()
         access_tokens: list[str] = [i.access_token for i in items]
 
     account_data = []
