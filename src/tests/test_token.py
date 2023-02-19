@@ -1,15 +1,12 @@
-from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from jose import jwt
 from pytest import fixture
 
 from moneyroundup.base import Base
 from moneyroundup.database import engine
 from moneyroundup.plaid_manager import client as plaid
-from moneyroundup.settings import settings
 
 
 @fixture(scope="function", autouse=True)

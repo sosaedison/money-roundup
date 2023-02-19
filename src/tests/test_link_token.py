@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 from fastapi.testclient import TestClient
 from jose import jwt
 
+from moneyroundup.plaid_manager import client as plaid
 from moneyroundup.settings import settings
 
 
@@ -16,18 +19,15 @@ def test_user_requests_link_token_with_valid_jwt(client: TestClient):
 
     assert reg_res.status_code == 200
 
-    token = jwt.decode(
-        reg_res.json()["access_token"],
-        settings.SECRET_KEY,
-        algorithms=settings.JWT_ALGORITHM,
-    )
-
-    link_token_res = client.post(
-        "/api/link/token/create",
-        headers={"Authorization": f"Bearer {reg_res.json()['access_token']}"},
-    )
-
-    print(link_token_res.json())
+    with patch.object(
+        plaid,
+        "link_token_create",
+        return_value={"link_token": "SIKE"},
+    ):
+        link_token_res = client.post(
+            "/api/link/token/create",
+            headers={"Authorization": f"Bearer {reg_res.json()['access_token']}"},
+        )
 
     assert link_token_res.status_code == 200
     assert link_token_res.json()["link_token"] is not None
@@ -35,10 +35,15 @@ def test_user_requests_link_token_with_valid_jwt(client: TestClient):
 
 def test_request_link_token_with_invalid_jwt(client: TestClient):
 
-    link_token_res = client.post(
-        "/api/link/token/create",
-        headers={"Authorization": f"Bearer SIKE"},  # <--- Invalid JWT
-    )
+    with patch.object(
+        plaid,
+        "link_token_create",
+        return_value={"link_token": "SIKE"},
+    ):
+        link_token_res = client.post(
+            "/api/link/token/create",
+            headers={"Authorization": f"Bearer SIKE"},  # <--- Invalid JWT
+        )
 
     assert link_token_res.status_code == 401
     assert link_token_res.json()["detail"] == "Could not validate token"
