@@ -28,29 +28,3 @@ def test_user_register_and_gets_jwt(client: TestClient):
     assert client_res.status_code == 200
     assert "access_token" in client_res.json()
     assert client_res.json()["access_token"] != ""
-
-
-# def test_user_login_and_gets_new_jwt(client: TestClient):
-#     """Test that a user can login and get a JWT token."""
-#     # Register a user
-#     new_user: dict[str, str] = {
-#         "email": "sosarocks@test.com",
-#         "first_name": "Sosa",
-#         "last_name": "Rocks",
-#         "profile_pic_url": "http://www.some_cool_pic.com",
-#     }
-
-#     registration_res = client.post("/api/user", json=new_user)
-
-#     reg_token = registration_res.json()["access_token"]
-
-#     # apparently the same JWT token is returned if the user registers and logs in within approx. 0.4 seconds
-#     time.sleep(1)
-
-#     # login user
-#     client_res = client.post("/api/user", json=new_user)
-
-#     # if a user registers and then logs in, they should not get the same JWT token
-#     assert client_res.status_code == 200
-#     assert "access_token" in client_res.json()
-#     assert client_res.json()["access_token"] != reg_token

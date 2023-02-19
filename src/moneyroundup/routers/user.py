@@ -43,6 +43,7 @@ def register(
     new_user: NewUser,
     session: Session = Depends(get_db),
 ):
+    """Register a new user if the user email doesn't exist. Otherwise return the user."""
     try:
 
         u = User(id=str(uuid4()), **new_user.dict())
@@ -50,7 +51,10 @@ def register(
             session.add(u)
             session.commit()
 
-    except (SQLiteIntegrityError, SQAIntegrityError):
+    except (
+        SQLiteIntegrityError,
+        SQAIntegrityError,
+    ):  # A user with this email already exists
         with session.begin():
             u: Any = session.query(User).filter(User.email == new_user.email).first()
 

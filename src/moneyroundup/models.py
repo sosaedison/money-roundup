@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, String
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import relationship
+
 from moneyroundup.base import Base
 
 
@@ -7,9 +8,9 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True, index=True)
-    first_name = Column(String(50))
-    last_name = Column(String(50))
-    email = Column(String(100), unique=True, index=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
     profile_pic_url = Column(String)
     items = relationship("Item")
 
