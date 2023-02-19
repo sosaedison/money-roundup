@@ -1,36 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
-
-from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
-from plaid.model.depository_filter import DepositoryFilter
-from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.link_token_account_filters import LinkTokenAccountFilters
 from plaid.model.depository_account_subtype import DepositoryAccountSubtype
 from plaid.model.depository_account_subtypes import DepositoryAccountSubtypes
-from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.depository_filter import DepositoryFilter
 from plaid.model.item_public_token_exchange_request import (
     ItemPublicTokenExchangeRequest,
 )
+from plaid.model.link_token_account_filters import LinkTokenAccountFilters
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.products import Products
 
+from moneyroundup.dependencies import get_current_user
 from moneyroundup.plaid_manager import client
-from moneyroundup.dependencies import get_db
-from moneyroundup.models import User
-from moneyroundup.schemas import PublicTokenExchangeBody, UserRequestingLinkToken
-
-from sqlalchemy.orm import Session
+from moneyroundup.schemas import PublicTokenExchangeBody, UserFromDB
 
 router = APIRouter(tags=["Link Token"])
 
 
 @router.post("/link/token/create")
 def link_token_create(
-    user: UserRequestingLinkToken, session: Session = Depends(get_db)
+    user: UserFromDB | None = Depends(get_current_user),
 ):
-    with session.begin():
-        u = session.query(User).filter(User.id == user.user_id).first()
-
-    if not u:
-        raise HTTPException(status_code=401, detail="User does not exist")
+    if not user:
+        raise HTTPException(status_code=401, detail="User Not Found")
 
     req = LinkTokenCreateRequest(
         products=[Products("auth"), Products("transactions")],
@@ -52,7 +45,7 @@ def link_token_create(
     )
     res = client.link_token_create(req)
 
-    return {"link_token": res["link_token"], "user_id": user.user_id}
+    return {"link_token": res["link_token"]}
 
 
 @router.post("/exchange/public/token")

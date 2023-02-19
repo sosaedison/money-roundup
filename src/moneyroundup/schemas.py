@@ -8,11 +8,22 @@ class NewUser(BaseModel):
     profile_pic_url: str | None = None
 
 
-class LoggedInUser(BaseModel):
-    user_id: str
+class UserFromDB(BaseModel):
+    id: str
     email: str
     first_name: str
     last_name: str
+    profile_pic_url: str | None = None
+
+    class Config:
+        orm_mode = True
+
+
+class LoggedInUser(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+    access_token: str
     profile_pic_url: str | None = None
 
 
@@ -31,6 +42,7 @@ class NewItemCreated(BaseModel):
 
 class UserRequestingLinkToken(BaseModel):
     user_id: str
+    access_token: str
 
 
 class LinkTokenForUser(BaseModel):
