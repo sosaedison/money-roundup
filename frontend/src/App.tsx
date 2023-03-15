@@ -1,24 +1,22 @@
-import { useState, useCallback, useEffect } from 'react'
-import './App.css'
+import { useCallback, useEffect, useState } from 'react';
+import './App.css';
 
-import PlaidLink from "./PlaidLink"
 import AccountItemList from './AccountItemList';
+import PlaidLink from "./PlaidLink";
 
-import {
-  usePlaidLink,
-  PlaidLinkOptions,
-  PlaidLinkOnSuccess,
-  PlaidLinkOnSuccessMetadata,
-} from 'react-plaid-link';
 import jwt_decode from "jwt-decode";
+import {
+  PlaidLinkOnSuccess,
+  PlaidLinkOnSuccessMetadata, PlaidLinkOptions, usePlaidLink
+} from 'react-plaid-link';
 
+declare var google: any
 
 function App() {
-  const [user, setUser] = useState()
+  const [user, setUser] = useState();
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userID, setUserID] = useState("")
-  const [accounts, setAccounts] = useState(Array)
+  const [userID, setUserID] = useState("");
+  const [accounts, setAccounts] = useState(Array);
 
   const createLinkToken = useCallback(async (user_id: string) => {
     console.log(JSON.stringify({user_id: user_id}))
@@ -37,7 +35,6 @@ function App() {
   }, [setToken])
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
-    setLoading(true)
     await fetch("http://127.0.0.1:8000/exchange/public/token", {
       method: "POST",
       headers: {
@@ -95,20 +92,23 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         // Once the user logs in, fetch a link token to add Bank Connections
-        const fresh_link_token = createLinkToken(data.user_id)
-        setToken(fresh_link_token)
+        createLinkToken(data.user_id)
+        // setToken(fresh_link_token)
         // Once the token is created, set the user object
         setUser(userObj);
         console.log(data)
         setUserID(data.user_id)
-        document.getElementById("signInDiv").hidden = true; // hide the login button
+        let signInDiv = document.getElementById("signInDiv")!;
+        signInDiv.hidden = true; // hide the login button
+        // document.getElementById("signInDiv").hidden = true; // hide the login button
       })
       .catch((err) => console.error(err));
   };
 
   function handleSignOut(event: any) {
     setUser(undefined);
-    document.getElementById("signInDiv").hidden = false;
+    let signInDiv = document.getElementById("signInDiv")!;
+    signInDiv.hidden = false; // show the login button
   }
 
   const fetchAccounts = () => {
