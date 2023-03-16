@@ -22,7 +22,6 @@
     "yarn": "^1.22.19"
   },
   "devDependencies": {
-    "@esbuild/darwin-x64": "^0.17.11",
     "@types/react": "^18.0.26",
     "vite": "^4.0.0"
   }
