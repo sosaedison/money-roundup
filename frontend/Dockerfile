@@ -1,4 +1,4 @@
-FROM node:19-alpine
+FROM node:19-alpine3.17
 EXPOSE 3000
 WORKDIR /app
 COPY package.json .

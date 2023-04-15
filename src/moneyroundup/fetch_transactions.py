@@ -5,7 +5,7 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from sqlalchemy.orm import Session
 
 from moneyroundup.dependencies import get_db
-from moneyroundup.models import Item, User
+from moneyroundup.models import Item, UserOld
 from moneyroundup.plaid_manager import client
 from moneyroundup.rabbit_manager import QueueManager
 
@@ -41,7 +41,7 @@ def fetch_transactions(access_token: str) -> int:
 def populate_queue_with_transactions(rabbit: QueueManager, session: Session = next(db)):
 
     with session.begin():
-        users: list[User] = session.query(User).all()
+        users: list[UserOld] = session.query(UserOld).all()
 
         for user in users:
 
