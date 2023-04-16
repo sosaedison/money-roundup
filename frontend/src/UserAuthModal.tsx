@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './UserAuthModal.css';
+// import './UserAuthModal.css';
 
 interface UserAuthModalProps {
   handleSignUp: (e: React.FormEvent) => void,
@@ -15,8 +15,8 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ handleSignUp, handleSignI
     };
 
     return (
-    <div className="modal">
-        <div className="modal-content">
+    <div className="flex items-center bg-zinc-900">
+        <div className="">
             <div className="tab-container">
                 <button
                     className={`tab ${!isSignUp ? 'active' : ''}`}
@@ -41,7 +41,6 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ handleSignUp, handleSignI
                 ) : (
                     <form onSubmit={handleSignUp} className="form">
                     <input type="email" placeholder="Email" required />
-                    <input type="password" placeholder="Password" required />
                     <button type="submit">Sign Up</button>
                     </form>
                 )}

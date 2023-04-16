@@ -37,7 +37,7 @@ function App() {
         } catch (error) {
           // token is invalid
           console.log("User has an invalid token");
-          localStorage.removeItem("moneyroundup_access_token");
+          cleanUserData();
         }
       }
       isTokenValid();
@@ -190,6 +190,12 @@ function App() {
     }
     const data = await res.json();
     return data;
+  }
+
+  function cleanUserData() {
+    localStorage.removeItem("moneyroundup_access_token");
+    setUserID(null);
+    setEmail(null);
   }
 
 
