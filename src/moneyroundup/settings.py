@@ -10,8 +10,15 @@ class Settings(BaseSettings):
     PROJECT_TITLE: str = os.getenv("PROJECT_TITLE", "MONEY_ROUND_UP")
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "SUPER_SECRET_KEY")
+    RESET_PASSWORD_SECRET_KEY: str = os.getenv(
+        "RESET_PASSWORD_SECRET_KEY", "SUPER_SECRET_KEY"
+    )
+    EMAIL_VERIFICATION_SECRET_KEY: str = os.getenv(
+        "EMAIL_VERIFICATION_SECRET_KEY", "SUPER_SECRET_KEY"
+    )
 
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "SUPER_SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS", 30))
 
     PLAID_SANDBOX_KEY: str = os.getenv("PLAID_SANDBOX_KEY", "")

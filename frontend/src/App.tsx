@@ -41,6 +41,8 @@ function App() {
         }
       }
       isTokenValid();
+    } else {
+      console.log("User is not logged in");
     }
 
     return () => {

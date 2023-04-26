@@ -6,6 +6,7 @@ from fastapi_users.db import (
     SQLAlchemyBaseUserTableUUID,
     SQLAlchemyUserDatabase,
 )
+from fastapi_users.authentication import AuthenticationBackend
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker

@@ -21,6 +21,9 @@ services:
       - /Users/sosaedison/Documents/GitHub/money-roundup/frontend:/app/frontend
 
   moneyroundup:
+    environment:
+      - RABBITMQ_HOST=localhost
+      - RABBITMQ_QUEUE=transactions_summary
     image: moneyroundup
     build:
       context: ./src

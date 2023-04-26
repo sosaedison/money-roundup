@@ -10,21 +10,21 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
-from httpx_oauth.clients.google import GoogleOAuth2
+
+# from httpx_oauth.clients.google import GoogleOAuth2
 
 from moneyroundup.database import OAuthAccount, get_user_db
 from moneyroundup.settings import settings
 
-SECRET = "SECRET"
 
-google_oauth_client = GoogleOAuth2(
-    settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET
-)
+# google_oauth_client = GoogleOAuth2(
+#     settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET
+# )
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[OAuthAccount, uuid.UUID]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
+    reset_password_token_secret = settings.RESET_PASSWORD_SECRET_KEY
+    verification_token_secret = settings.EMAIL_VERIFICATION_SECRET_KEY
 
     async def on_after_register(
         self, user: OAuthAccount, request: Optional[Request] = None
@@ -34,11 +34,17 @@ class UserManager(UUIDIDMixin, BaseUserManager[OAuthAccount, uuid.UUID]):
     async def on_after_forgot_password(
         self, user: OAuthAccount, token: str, request: Optional[Request] = None
     ):
+        # What we'd want to do here is formulate an email to the user with a link to reset their password.
+        # For now, we'll just print the token to the console.
+
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
     async def on_after_request_verify(
         self, user: OAuthAccount, token: str, request: Optional[Request] = None
     ):
+        # What we'd want to do here is formulate an email to the user with a link to verify their email.
+        # For now, we'll just print the token to the console.
+
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
 
@@ -50,7 +56,7 @@ bearer_transport = BearerTransport(tokenUrl="/api/auth/jwt/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=10)
+    return JWTStrategy(secret=settings.JWT_SECRET, lifetime_seconds=3600)
 
 
 auth_backend = AuthenticationBackend(
