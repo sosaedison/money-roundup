@@ -1,33 +1,62 @@
-import { useState, useCallback, useEffect } from 'react'
-import './App.css'
-
-import PlaidLink from "./PlaidLink"
+import { useCallback, useEffect, useState } from 'react';
 import AccountItemList from './AccountItemList';
+import './App.css';
+import PlaidLink from './PlaidLink';
+
+import UserAuthModal from './UserAuthModal';
+
 
 import {
-  usePlaidLink,
-  PlaidLinkOptions,
   PlaidLinkOnSuccess,
-  PlaidLinkOnSuccessMetadata,
+  PlaidLinkOnSuccessMetadata, PlaidLinkOptions, usePlaidLink
 } from 'react-plaid-link';
-import jwt_decode from "jwt-decode";
 
 
 function App() {
-  const [user, setUser] = useState()
+  const [user, setUser] = useState();
+  const [email, setEmail] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userID, setUserID] = useState("")
-  const [accounts, setAccounts] = useState(Array)
+  const [userID, setUserID] = useState(null);
+  const [accounts, setAccounts] = useState(Array);
+  const [loginHidden, setLoginHidden] = useState(false);
+
+  useEffect(() => {
+    // check if user is logged in
+    // check local storage for access token
+    const accessToken = localStorage.getItem("moneyroundup_access_token");
+    if (accessToken) {
+      // fetch user data
+      const isTokenValid = async () => {
+        try {
+          const data = await getUserInfo(accessToken);
+          // token is valid
+          // set user data
+          setEmail(data["email"]);
+          setUserID(data["id"]);
+          setLoginHidden(true);
+        } catch (error) {
+          // token is invalid
+          console.log("User has an invalid token");
+          cleanUserData();
+        }
+      }
+      isTokenValid();
+    } else {
+      console.log("User is not logged in");
+    }
+
+    return () => {
+      console.log("cleanup")
+    }
+  }, [])
 
   const createLinkToken = useCallback(async (user_id: string) => {
-    console.log(JSON.stringify({user_id: user_id}))
     const response = await fetch("http://127.0.0.1:8000/link/token/create", 
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        'accept': 'application/json'
+        'Accept': 'application/json'
       },
       body: JSON.stringify({user_id: user_id})
     });
@@ -37,7 +66,6 @@ function App() {
   }, [setToken])
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
-    setLoading(true)
     await fetch("http://127.0.0.1:8000/exchange/public/token", {
       method: "POST",
       headers: {
@@ -75,40 +103,11 @@ function App() {
 
   const {open, ready, exit, error} = usePlaidLink(config)
 
-
-  const handleGoogleResponseCallBack = (response: any) => {
-    let userObj: any = jwt_decode(response.credential);
-
-    fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        first_name: userObj.given_name,
-        last_name: userObj.family_name,
-        email: userObj.email,
-        profile_pic_url: userObj.picture,
-      }),
-      credentials: "omit",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Once the user logs in, fetch a link token to add Bank Connections
-        const fresh_link_token = createLinkToken(data.user_id)
-        setToken(fresh_link_token)
-        // Once the token is created, set the user object
-        setUser(userObj);
-        console.log(data)
-        setUserID(data.user_id)
-        document.getElementById("signInDiv").hidden = true; // hide the login button
-      })
-      .catch((err) => console.error(err));
-  };
-
   function handleSignOut(event: any) {
-    setUser(undefined);
-    document.getElementById("signInDiv").hidden = false;
+    event.preventDefault();
+    setUserID(null);
+    setEmail(null);
+    localStorage.removeItem("moneyroundup_access_token");
   }
 
   const fetchAccounts = () => {
@@ -121,29 +120,101 @@ function App() {
     .catch(err => console.error(err))
   }
 
-  useEffect(() => {
-    /* global google */
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: handleGoogleResponseCallBack,
-    });
+  const handleSignUp = (e: any) => {
+    e.preventDefault();
+    const email = e.target[0].value;
+    const password = e.target[1].value;
 
-    google.accounts.id.renderButton(document.getElementById("signInDiv"), {
-      theme: "outline",
-      size: "large",
-    });
-  })
+    fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      },
+      body: JSON.stringify({email: email, password: password, is_active: true, is_superuser: false, is_verified: false})
+    })
+    .then(res => res.json())
+    .then((data) => {
+      console.log(data)
+    })
+    .catch(err => console.error(err))
+  }
+
+  const handleSignIn = (e: any) => {
+    e.preventDefault();
+    const username = e.target[0].value;
+    const password = e.target[1].value;
+
+    const urlSearchParams = new URLSearchParams();
+    urlSearchParams.append("username", username);
+    urlSearchParams.append("password", password);
+    const urlEncodedString = urlSearchParams.toString();
+
+    fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/jwt/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: urlEncodedString
+    })
+    .then(res => res.json())
+    .then((data) => {
+      localStorage.setItem("moneyroundup_access_token", data["access_token"]);
+      fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/users/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${data["access_token"]}`
+        }
+      })
+      .then(res => res.json())
+      .then((data) => {
+        setEmail(data);
+        setUserID(data["id"]);
+        setLoginHidden(true);
+      })
+      .catch(err => console.error(err))
+    })
+    .catch(err => console.error(err))
+  }
+
+  async function getUserInfo(accessToken: string) {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      }
+    })
+
+    if (res.status !== 200) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await res.json();
+    return data;
+  }
+
+  function cleanUserData() {
+    localStorage.removeItem("moneyroundup_access_token");
+    setUserID(null);
+    setEmail(null);
+  }
+
 
   return (
     <div className="App">
-      {user && <>
-        <button onClick={(e) => handleSignOut(e)}>Sign Out</button> 
-        <PlaidLink ready={ready} open={open} /> 
-        <button onClick={() => fetchAccounts()}>Fetch Accounts</button> 
-        <AccountItemList accounts={accounts} /> 
+      {!userID && <>
+        <UserAuthModal handleSignUp={handleSignUp} handleSignIn={handleSignIn} />
+        </>
+      }
+      
+      {userID && <>
+        <button onClick={(e) => handleSignOut(e)}>Sign Out</button>
+        <PlaidLink ready={ready} open={open} />
+        <button onClick={() => fetchAccounts()}>Fetch Accounts</button>
+        <AccountItemList accounts={accounts} />
       </>}
-      <div id="signInDiv"></div>
-      {}
+
     </div>
   )
 }

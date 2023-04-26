@@ -1,6 +1,8 @@
 import os
 
+import pytest_asyncio
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from pytest import fixture
 
 os.environ["ENV"] = "TEST"
@@ -13,6 +15,15 @@ from moneyroundup.settings import settings
 def client():
     client = TestClient(app)
     yield client
+
+
+@pytest_asyncio.fixture
+async def async_client():
+    """Create a test client for the app."""
+    from moneyroundup.main import app
+
+    async with AsyncClient(app=app, base_url="http://localhost:8000") as ac:
+        yield ac
 
 
 def decode_token(token: str) -> str:

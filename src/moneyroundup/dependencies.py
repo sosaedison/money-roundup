@@ -1,13 +1,22 @@
-from typing import Any, Generator
+from typing import Any, AsyncGenerator, Generator
 
 from fastapi import Depends, HTTPException, Request
 from jose import ExpiredSignatureError, JWTError, jwt
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from moneyroundup.database import SessionLocal
-from moneyroundup.models import User
+from moneyroundup.database import SessionLocal, async_session_maker
+from moneyroundup.models import UserOld
 from moneyroundup.schemas import UserFromDB
 from moneyroundup.settings import settings
+
+
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    db: AsyncSession = async_session_maker()
+    try:
+        yield db
+    finally:
+        await db.close()
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -44,6 +53,6 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     with session.begin():
-        user = session.query(User).get(token["sub"])
+        user = session.query(UserOld).get(token["sub"])
 
     return UserFromDB.from_orm(user)

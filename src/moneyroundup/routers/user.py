@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError as SQAIntegrityError
 from sqlalchemy.orm import Session
 
 from moneyroundup.dependencies import get_db
-from moneyroundup.models import User
+from moneyroundup.models import UserOld
 from moneyroundup.schemas import LoggedInUser, NewUser
 from moneyroundup.settings import settings
 
@@ -46,7 +46,7 @@ def register(
     """Register a new user if the user email doesn't exist. Otherwise return the user."""
     try:
 
-        u = User(id=str(uuid4()), **new_user.dict())
+        u = UserOld(id=str(uuid4()), **new_user.dict())
         with session.begin():
             session.add(u)
             session.commit()
@@ -56,7 +56,9 @@ def register(
         SQAIntegrityError,
     ):  # A user with this email already exists
         with session.begin():
-            u: Any = session.query(User).filter(User.email == new_user.email).first()
+            u: Any = (
+                session.query(UserOld).filter(UserOld.email == new_user.email).first()
+            )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_SECONDS)
     access_token = generate_jwt({"sub": u.id}, expires_delta=access_token_expires)

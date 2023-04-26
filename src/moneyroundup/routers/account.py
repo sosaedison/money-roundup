@@ -6,7 +6,7 @@ from plaid.model.accounts_get_response import AccountsGetResponse
 from sqlalchemy.orm import Session
 
 from moneyroundup.dependencies import get_current_user, get_db
-from moneyroundup.models import Item, User
+from moneyroundup.models import Item, UserOld
 from moneyroundup.plaid_manager import client
 from moneyroundup.schemas import UserFromDB
 

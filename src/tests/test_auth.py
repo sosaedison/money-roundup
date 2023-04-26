@@ -1,30 +1,47 @@
-from fastapi.testclient import TestClient
-from pytest import fixture
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient
 
-from moneyroundup.base import Base
-from moneyroundup.database import engine
-
-
-@fixture(scope="function", autouse=True)
-def rest_db():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 
 
-def test_user_register_and_gets_jwt(client: TestClient):
-    """Test that a user can register and get a JWT token."""
-    # Register a user
-    new_user: dict[str, str] = {
-        "email": "sosarocks@test.com",
-        "first_name": "Sosa",
-        "last_name": "Rocks",
-        "profile_pic_url": "http://www.some_cool_pic.com",
-    }
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def rest_db():
+    """Reset the database before each test."""
+    await drop_db_and_tables()
+    await create_db_and_tables()
 
-    # register new user
-    client_res = client.post("/api/user", json=new_user)
 
-    # Assert that the user was created and the JWT token was returned
+@pytest.mark.asyncio
+async def test_user_register_and_access_their_info(async_client: AsyncClient):
+    """Test that a user can register and get a JWT token and then use that token to access their info."""
+
+    # define a user
+    new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
+
+    # register the user
+    client_res = await async_client.post("/api/auth/register", json=new_user)
+
+    # assert that the user was created
+    assert client_res.status_code == 201
+
+    # login with the new user
+    client_res = await async_client.post(
+        "/api/auth/jwt/login",
+        data={"username": new_user["email"], "password": new_user["password"]},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+
     assert client_res.status_code == 200
-    assert "access_token" in client_res.json()
-    assert client_res.json()["access_token"] != ""
+
+    # get the access token
+    access_token = client_res.json()["access_token"]
+
+    # get the user from the database
+    client_res = await async_client.get(
+        f"/api/auth/users/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    registered_user = client_res.json()
+
+    assert registered_user["email"] == new_user["email"]
