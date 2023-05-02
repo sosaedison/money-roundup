@@ -11,16 +11,16 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.products import Products
 
-from moneyroundup.dependencies import get_current_user
 from moneyroundup.plaid_manager import client
 from moneyroundup.schemas import PublicTokenExchangeBody, UserFromDB
+from moneyroundup.users import current_active_user
 
 router = APIRouter(tags=["Link Token"])
 
 
 @router.post("/link/token/create")
 def link_token_create(
-    user: UserFromDB | None = Depends(get_current_user),
+    user = Depends(current_active_user),
 ):
     if not user:
         raise HTTPException(status_code=401, detail="User Not Found")

@@ -1,4 +1,6 @@
 from typing import AsyncGenerator, List
+from contextlib import asynccontextmanager
+
 
 from fastapi import Depends
 from fastapi_users.db import (
@@ -26,7 +28,8 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     # oauth_accounts: Mapped[List[OAuthAccount]] = relationship(
     #     "OAuthAccount", lazy="joined"
     # )
-    pass
+    def __str__(self) -> str:
+        return f"USER({self.id} | {self.email} | {self.is_active})"
 
 
 engine = create_engine(settings.DB_CONNECTION_STRING, echo=False)
@@ -48,7 +51,18 @@ async def drop_db_and_tables():
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-        yield session
+          yield session
+
+@asynccontextmanager
+async def get_async_session_context_manager():
+    async with AsyncSession(async_engine, expire_on_commit=False) as session:
+        try:
+            yield session
+        except Exception as e:
+            await session.rollback()
+            raise e
+        finally:
+            await session.close()
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):

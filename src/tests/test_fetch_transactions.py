@@ -1,46 +1,23 @@
 from unittest.mock import patch
-from uuid import uuid4
+from httpx import AsyncClient
+
 
 from pytest import fixture
 import pytest
-from sqlalchemy.orm import Session
-
-from moneyroundup.base import Base
-from moneyroundup.database import engine
-from moneyroundup.dependencies import get_db
+import pytest_asyncio
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
-from moneyroundup.models import Item, UserOld
 from moneyroundup.plaid_manager import client
-from moneyroundup.rabbit_manager import QueueManager, RabbitManager
+from moneyroundup.database import (
+    create_db_and_tables,
+    drop_db_and_tables
+)
 
 
-@fixture(scope="function", autouse=True)
-def reset_db():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-
-    new_user = UserOld(
-        id=str(uuid4()),
-        email="sosarocks@test.com",
-        first_name="Sosa",
-        last_name="Rocks",
-        profile_pic_url="http://www.some_cool_pic.com",
-    )
-
-    db = get_db()
-    session: Session = next(db)
-
-    with session.begin():
-        session.add(new_user)
-        session.commit()
-
-
-@fixture()
-def database_session():
-    db = get_db()
-    session: Session = next(db)
-    return session
-
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def rest_db():
+    """Reset the database before each test."""
+    await drop_db_and_tables()
+    await create_db_and_tables()
 
 @fixture()
 def test_queue_manager():
@@ -59,34 +36,50 @@ def test_queue_manager():
     return TestQueueManager()
 
 
-@pytest.mark.skip(reason="need to update related code to use new database schema")
-def test_populate_queue_with_transactions(test_queue_manager, database_session):
+@pytest.mark.asyncio
+async def test_populate_queue_with_transactions(
+    test_queue_manager, async_client: AsyncClient
+):
+    # define a user
+    new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
+
+    # register the user
+    client_res = await async_client.post("/api/auth/register", json=new_user)
+
+    # assert that the user was created
+    assert client_res.status_code == 201
+
+    # get the user id
+    user_id = client_res.json()["id"]
+
+    # login with the new user
+    client_res = await async_client.post(
+        "/api/auth/jwt/login",
+        data={"username": new_user["email"], "password": new_user["password"]},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+    assert client_res.status_code == 200
+
+    # get the access token
+    access_token = client_res.json()["access_token"]
+
+    # create item in database for this user
+    item_res = await async_client.post(
+        "/api/item",
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Bearer {access_token}"},
+        json={"user_id": user_id, "access_token": "test_access_token"},
+    )
+
+    assert item_res.status_code == 201
+
     # create test QueueManager
     rabbit = test_queue_manager
-
-    # create test database session
-    session: Session = database_session
-
-    # create test Item with access_token
-    access_token = "test_access_token"
-    with session.begin():
-        user: UserOld | None = (
-            session.query(UserOld).filter(UserOld.first_name == "Sosa").first()
-        )
-        if user is not None:
-            i = Item(
-                id=str(uuid4()),
-                access_token=access_token,
-                user_id=user.id,
-                active=True,
-            )
-
-            session.add(i)
-            session.commit()
 
     # create test transaction for plaid response
     plaid_client_response = {"total_transactions": 0}
     with patch.object(client, "transactions_get", return_value=plaid_client_response):
-        populate_queue_with_transactions(rabbit, session)
+        await populate_queue_with_transactions(rabbit)
 
     assert len(rabbit.queue) == 1
