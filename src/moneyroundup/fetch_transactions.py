@@ -2,12 +2,14 @@ import datetime
 
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from moneyroundup.dependencies import get_db
 from moneyroundup.models import Item, UserOld
 from moneyroundup.plaid_manager import client
 from moneyroundup.rabbit_manager import QueueManager
+from moneyroundup.database import get_async_session_context_manager, User
 
 db = get_db()
 
@@ -38,20 +40,24 @@ def fetch_transactions(access_token: str) -> int:
     return total_transactions
 
 
-def populate_queue_with_transactions(rabbit: QueueManager, session: Session = next(db)):
+async def populate_queue_with_transactions(queue: QueueManager, session = get_async_session_context_manager):
 
-    with session.begin():
-        users: list[UserOld] = session.query(UserOld).all()
+    async with session() as session:
+        # users: list[UserOld] = session.query(UserOld).all()
+        result = await session.execute(select(User))
+        users = [{"id": u.id, "email": u.email} for u in result.scalars()]
 
         for user in users:
 
-            items: list[Item] = (
-                session.query(Item).filter(Item.user_id == user.id).all()
+            items = await (
+                session.execute(select(Item).where(Item.user_id == str(user.get("id"))))
             )
-            access_tokens: list[str] = [str(item.access_token) for item in items]
+            items = [{"user_id": item.user_id, "access_token": item.access_token} for item in items.scalars()]
+
+            access_tokens: list[str] = [str(item.get("access_token")) for item in items]
 
             total_transactions = 0
             for access_token in access_tokens:
                 total_transactions += fetch_transactions(access_token=access_token)
 
-            rabbit.produce(f"The total of your transactions was ${total_transactions}.")
+            queue.produce(f"The total of your transactions was ${total_transactions}.")
