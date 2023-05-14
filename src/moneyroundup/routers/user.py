@@ -17,11 +17,8 @@ from moneyroundup.settings import settings
 router = APIRouter(prefix="/user", tags=["User"])
 
 
-def generate_jwt(data: dict | None = None, expires_delta: timedelta | None = None):
-    if data is None:
-        data = {}
-
-    to_encode = copy.deepcopy(data)
+def generate_jwt(payload: dict, expires_delta: timedelta | None = None):
+    payload = copy.deepcopy(payload)
 
     now = datetime.utcnow()
     if expires_delta:
@@ -29,11 +26,11 @@ def generate_jwt(data: dict | None = None, expires_delta: timedelta | None = Non
     else:
         expire = now + timedelta(minutes=15)
 
-    to_encode.update({"exp": expire})
-    to_encode.update({"iat": now})
+    payload.update({"exp": expire})
+    payload.update({"iat": now})
 
     encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        payload, settings.APP_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
     )
     return encoded_jwt
 

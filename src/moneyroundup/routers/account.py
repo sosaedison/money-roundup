@@ -6,7 +6,7 @@ from plaid.model.accounts_get_response import AccountsGetResponse
 from sqlalchemy.orm import Session
 
 from moneyroundup.dependencies import get_current_user, get_db
-from moneyroundup.models import Item, UserOld
+from moneyroundup.models import Item
 from moneyroundup.plaid_manager import client
 from moneyroundup.schemas import UserFromDB
 
@@ -24,7 +24,7 @@ async def get_accounts(
     with session.begin():
 
         items = session.query(Item).filter(Item.user_id == user.id).all()
-        access_tokens: list[str] = [i.access_token for i in items]
+        access_tokens: list[str] = [str(i.access_token) for i in items]
 
     account_data = []
     for access_token in access_tokens:
