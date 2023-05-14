@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     EMAIL_SERVICE_PASSWORD: SecretStr = SecretStr(
         os.getenv("EMAIL_SERVICE_PASSWORD", "")
     )
-    EMAIL_SERVICE_HOST: str = os.getenv("EMAIL_SERVICE_HOST", "")
-    EMAIL_SERVICE_PORT: int = int(os.getenv("EMAIL_SERVICE_PORT", ""))
+    EMAIL_SERVICE_HOST: str = os.getenv("EMAIL_SERVICE_HOST", "smtp.gmail.com")
+    EMAIL_SERVICE_PORT: int = int(os.getenv("EMAIL_SERVICE_PORT", 587))
     EMAIL_SERVICE_TYPE: str = os.getenv("EMAIL_SERVICE_TYPE", "DEV")
 
     RESET_PASSWORD_SECRET_KEY: SecretStr = SecretStr(
