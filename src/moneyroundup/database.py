@@ -1,14 +1,13 @@
-from typing import AsyncGenerator, List
 from contextlib import asynccontextmanager
-
+from typing import AsyncGenerator, List
 
 from fastapi import Depends
+from fastapi_users.authentication import AuthenticationBackend
 from fastapi_users.db import (
     SQLAlchemyBaseOAuthAccountTableUUID,
     SQLAlchemyBaseUserTableUUID,
     SQLAlchemyUserDatabase,
 )
-from fastapi_users.authentication import AuthenticationBackend
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker
@@ -28,8 +27,11 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     # oauth_accounts: Mapped[List[OAuthAccount]] = relationship(
     #     "OAuthAccount", lazy="joined"
     # )
+    first_name: str = ""
+    last_name: str = ""
+
     def __str__(self) -> str:
-        return f"USER({self.id} | {self.email} | {self.is_active})"
+        return f"USER({self.first_name} | {self.email} | {self.is_active})"
 
 
 engine = create_engine(settings.DB_CONNECTION_STRING, echo=False)
@@ -51,7 +53,8 @@ async def drop_db_and_tables():
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-          yield session
+        yield session
+
 
 @asynccontextmanager
 async def get_async_session_context_manager():

@@ -1,18 +1,21 @@
 from uuid import uuid4
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from moneyroundup.database import get_async_session_context_manager
-from moneyroundup.users import current_active_user
-
 from moneyroundup.models import Item
 from moneyroundup.schemas import CreateNewItem
-
+from moneyroundup.users import current_active_user
 
 router = APIRouter(prefix="/item", tags=["Item"])
 
 
 @router.post("", status_code=201)
-async def create_item(payload: CreateNewItem, session = get_async_session_context_manager, user = Depends(current_active_user)):
+async def create_item(
+    payload: CreateNewItem,
+    session=Depends(get_async_session_context_manager),
+    user=Depends(current_active_user),
+):
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -23,7 +26,7 @@ async def create_item(payload: CreateNewItem, session = get_async_session_contex
         active=True,
     )
 
-    async with session() as session:
+    async with session as session:
         session.add(i)
         await session.commit()
 

@@ -20,7 +20,7 @@ router = APIRouter(tags=["Link Token"])
 
 @router.post("/link/token/create")
 def link_token_create(
-    user = Depends(current_active_user),
+    user=Depends(current_active_user),
 ):
     if not user:
         raise HTTPException(status_code=401, detail="User Not Found")

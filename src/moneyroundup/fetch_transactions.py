@@ -5,11 +5,11 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from moneyroundup.database import User, get_async_session_context_manager
 from moneyroundup.dependencies import get_db
 from moneyroundup.models import Item, UserOld
 from moneyroundup.plaid_manager import client
 from moneyroundup.rabbit_manager import QueueManager
-from moneyroundup.database import get_async_session_context_manager, User
 
 db = get_db()
 
@@ -40,7 +40,9 @@ def fetch_transactions(access_token: str) -> int:
     return total_transactions
 
 
-async def populate_queue_with_transactions(queue: QueueManager, session = get_async_session_context_manager):
+async def populate_queue_with_transactions(
+    queue: QueueManager, session=get_async_session_context_manager
+):
 
     async with session() as session:
         # users: list[UserOld] = session.query(UserOld).all()
@@ -52,7 +54,10 @@ async def populate_queue_with_transactions(queue: QueueManager, session = get_as
             items = await (
                 session.execute(select(Item).where(Item.user_id == str(user.get("id"))))
             )
-            items = [{"user_id": item.user_id, "access_token": item.access_token} for item in items.scalars()]
+            items = [
+                {"user_id": item.user_id, "access_token": item.access_token}
+                for item in items.scalars()
+            ]
 
             access_tokens: list[str] = [str(item.get("access_token")) for item in items]
 

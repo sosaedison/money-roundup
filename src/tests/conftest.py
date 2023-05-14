@@ -30,6 +30,6 @@ def decode_token(token: str) -> str:
     """Decode a JWT token and return the user id."""
     from jose import jwt
 
-    return jwt.decode(token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHM)[
-        "sub"
-    ]
+    return jwt.decode(
+        token, settings.APP_SECRET_KEY, algorithms=settings.JWT_ALGORITHM
+    )["sub"]
