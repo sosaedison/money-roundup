@@ -1,16 +1,13 @@
 from unittest.mock import patch
-import pytest
 
-from fastapi.testclient import TestClient
 import pytest
-
 import pytest_asyncio
-
+from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
-
 from moneyroundup.plaid_manager import client as plaid
+from moneyroundup.users import UserManager
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -26,7 +23,8 @@ async def test_user_requests_link_token_with_valid_jwt(async_client: AsyncClient
     new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
 
     # register the user
-    reg_res = await async_client.post("/api/auth/register", json=new_user)
+    with patch.object(UserManager, "on_after_register", return_value=None):
+        reg_res = await async_client.post("/api/auth/register", json=new_user)
 
     assert reg_res.status_code == 201
 
@@ -58,7 +56,6 @@ async def test_user_requests_link_token_with_valid_jwt(async_client: AsyncClient
 
 @pytest.mark.asyncio
 async def test_request_link_token_with_invalid_jwt(async_client: AsyncClient):
-
     with patch.object(
         plaid,
         "link_token_create",

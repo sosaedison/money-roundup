@@ -1,14 +1,14 @@
 from unittest.mock import patch
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient
-
 from uuid import uuid4
 
+import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
-from moneyroundup.plaid_manager import client as plaid
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
+from moneyroundup.plaid_manager import client as plaid
+from moneyroundup.users import UserManager
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -20,12 +20,12 @@ async def rest_db():
 
 @pytest.mark.asyncio
 async def test_create_link_token_for_existing_user(async_client: AsyncClient):
-
     # define a user
     new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
 
     # register the user
-    reg_res = await async_client.post("/api/auth/register", json=new_user)
+    with patch.object(UserManager, "on_after_register", return_value=None):
+        reg_res = await async_client.post("/api/auth/register", json=new_user)
 
     # assert that the user was created
     assert reg_res.status_code == 201
@@ -58,7 +58,6 @@ async def test_create_link_token_for_existing_user(async_client: AsyncClient):
 
 
 def test_create_link_token_for_non_existing_user(client: TestClient):
-
     with patch.object(
         plaid,
         "link_token_create",

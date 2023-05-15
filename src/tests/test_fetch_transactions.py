@@ -1,16 +1,14 @@
 from unittest.mock import patch
-from httpx import AsyncClient
 
-
-from pytest import fixture
 import pytest
 import pytest_asyncio
+from httpx import AsyncClient
+from pytest import fixture
+
+from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
 from moneyroundup.plaid_manager import client
-from moneyroundup.database import (
-    create_db_and_tables,
-    drop_db_and_tables
-)
+from moneyroundup.users import UserManager
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -18,6 +16,7 @@ async def rest_db():
     """Reset the database before each test."""
     await drop_db_and_tables()
     await create_db_and_tables()
+
 
 @fixture()
 def test_queue_manager():
@@ -44,7 +43,8 @@ async def test_populate_queue_with_transactions(
     new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
 
     # register the user
-    client_res = await async_client.post("/api/auth/register", json=new_user)
+    with patch.object(UserManager, "on_after_register", return_value=None):
+        client_res = await async_client.post("/api/auth/register", json=new_user)
 
     # assert that the user was created
     assert client_res.status_code == 201
@@ -67,8 +67,10 @@ async def test_populate_queue_with_transactions(
     # create item in database for this user
     item_res = await async_client.post(
         "/api/item",
-        headers={"Content-Type": "application/json",
-                 "Authorization": f"Bearer {access_token}"},
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}",
+        },
         json={"user_id": user_id, "access_token": "test_access_token"},
     )
 

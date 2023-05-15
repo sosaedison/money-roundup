@@ -1,8 +1,12 @@
+import os
+from unittest.mock import patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
+from moneyroundup.users import UserManager
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -20,7 +24,8 @@ async def test_user_register_and_access_their_info(async_client: AsyncClient):
     new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
 
     # register the user
-    client_res = await async_client.post("/api/auth/register", json=new_user)
+    with patch.object(UserManager, "on_after_register", return_value=None):
+        client_res = await async_client.post("/api/auth/register", json=new_user)
 
     # assert that the user was created
     assert client_res.status_code == 201

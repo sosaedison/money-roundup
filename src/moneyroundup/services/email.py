@@ -12,7 +12,7 @@ class EmailService(Protocol):
         ...
 
 
-def EmailFactory(env: str = "DEV") -> EmailService:
+def EmailFactory(env: str) -> EmailService:
     """Return an email service based on the given service type."""
     email_service_by_env = {
         "DEV": LocalEmailService,
