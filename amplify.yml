@@ -1,0 +1,28 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - yarn install
+            - npm install -g typescript
+        build:
+          commands:
+            - yarn run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+    appRoot: frontend
+  - backend:
+    phases:
+      preBuild:
+        commands:
+          - pip install -r requirements.txt
+      build:
+        commands:
+          - uvicorn moneyroundup.main:app
+    appRoot: src
