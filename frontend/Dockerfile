@@ -1,8 +1,11 @@
-FROM node:19-alpine3.17
+FROM node:lts-alpine as build
 EXPOSE 3000
 WORKDIR /app
 COPY package.json .
 RUN npm install
-RUN npm i esbuild
 COPY . .
-CMD ["yarn", "run", "dev"]
+RUN npm run build
+FROM nginx:stable-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

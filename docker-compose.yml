@@ -1,36 +1,14 @@
 version: '3.4'
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-
   frontend:
-    env_file:
-      - src/.env
-    image: frontend
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
+    image: sosalosa/moneyroundup_frontend:latest
     ports:
-      - 3000:3000
-    volumes:
-      - /Users/sosaedison/Documents/GitHub/money-roundup/frontend:/app/frontend
+      - 8080:80
+    restart: on-failure
 
   backend:
-    env_file:
-      - frontend/.env
-    image: moneyroundup
-    build:
-      context: ./src
-      dockerfile: ./Dockerfile
+    image: sosalosa/moneyroundup_backend:latest
     ports:
       - 8000:8000
-    volumes:
-      - /Users/sosaedison/Documents/GitHub/money-roundup/src/moneyroundup:/app/moneyroundup
     restart: on-failure

@@ -2,18 +2,24 @@ import smtplib
 from email.message import EmailMessage
 from typing import Protocol
 
+import boto3
+
 from moneyroundup.dependencies import _get_secret_value
 from moneyroundup.settings import settings
 
 
 class EmailService(Protocol):
     def send_email(self, to: str, subject: str, body: str) -> None:
-        """Send an email to the given email address with the given subject and body."""
+        """
+        Send an email to the given email address with the given subject and body.
+        """
         ...
 
 
 def EmailFactory(env: str) -> EmailService:
-    """Return an email service based on the given service type."""
+    """
+    Return an email service based on the given service type.
+    """
     email_service_by_env = {
         "DEV": LocalEmailService,
         "PRODUCTION": ProductionEmailService,
@@ -25,6 +31,9 @@ def EmailFactory(env: str) -> EmailService:
 
 
 class ProductionEmailService:
+    def __init__(self) -> None:
+        self.ses_client = boto3.client("ses")
+
     @staticmethod
     def send_email(
         to: str,
