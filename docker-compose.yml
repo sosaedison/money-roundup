@@ -2,13 +2,22 @@ version: '3.4'
 
 services:
   frontend:
-    image: sosalosa/moneyroundup_frontend:latest
+    env_file:
+      - frontend/.env
+    image: moneyroundup_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - 8080:80
-    restart: on-failure
+      - 80:80
 
   backend:
-    image: sosalosa/moneyroundup_backend:latest
+    env_file:
+      - src/.env
+    image: moneyroundup_backend
+    build:
+      context: ./src
+      dockerfile: ./Dockerfile
     ports:
       - 8000:8000
     restart: on-failure
