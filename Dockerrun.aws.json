@@ -1,0 +1,34 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "containerDefinitions": [
+      {
+        "name": "frontend",
+        "image": "your-frontend-image-repository",
+        "portMappings": [
+          {
+            "hostPort": 80,
+            "containerPort": 80
+          }
+        ],
+        "links": [
+          "backend"
+        ],
+        "environment": [
+          {
+            "name": "REACT_APP_BACKEND_URL",
+            "value": "http://backend:8000"
+          }
+        ]
+      },
+      {
+        "name": "backend",
+        "image": "your-backend-image-repository",
+        "portMappings": [
+          {
+            "hostPort": 8000,
+            "containerPort": 8000
+          }
+        ]
+      }
+    ]
+  }
