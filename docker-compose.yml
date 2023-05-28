@@ -2,8 +2,6 @@ version: '3.4'
 
 services:
   frontend:
-    env_file:
-      - frontend/.env
     image: moneyroundup_frontend
     build:
       context: ./frontend
@@ -12,8 +10,6 @@ services:
       - 80:80
 
   backend:
-    env_file:
-      - src/.env
     image: moneyroundup_backend
     build:
       context: ./src
