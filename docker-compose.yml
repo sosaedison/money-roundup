@@ -1,19 +1,19 @@
 version: '3.4'
 
 services:
-  frontend:
-    image: moneyroundup_frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - 80:80
+  # frontend:
+  #   image: sosalosa/moneyroundup_frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 80:80
 
   backend:
-    image: moneyroundup_backend
-    build:
-      context: ./src
-      dockerfile: ./Dockerfile
+    image: sosalosa/moneyroundup_backend
+    # build:
+    #   context: ./src
+    #   dockerfile: ./Dockerfile
     ports:
       - 8000:8000
     restart: on-failure
