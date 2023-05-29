@@ -1,15 +1,12 @@
 {
-    "AWSEBDockerrunVersion": "1",
-    "containerDefinitions": [
-      {
-        "name": "backend",
-        "image": "sosalosa/moneyroundup_backend",
-        "portMappings": [
-          {
-            "hostPort": 8000,
-            "containerPort": 8000
-          }
-        ]
-      }
-    ]
-  }
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "sosalosa/moneyroundup_backend",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "80"
+    }
+  ]
+}
