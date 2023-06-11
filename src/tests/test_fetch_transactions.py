@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from pytest import fixture
 
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
@@ -18,27 +17,8 @@ async def rest_db():
     await create_db_and_tables()
 
 
-@fixture()
-def test_queue_manager():
-    class TestQueueManager:
-        # this class acts as a mock for the RabbitManager class
-        def __init__(self) -> None:
-            self.queue: list[str] = []
-
-        def consume(self) -> str:
-            ...
-
-        def produce(self, message: str) -> bool:
-            self.queue.append(message)
-            return True
-
-    return TestQueueManager()
-
-
 @pytest.mark.asyncio
-async def test_populate_queue_with_transactions(
-    test_queue_manager, async_client: AsyncClient
-):
+async def test_populate_queue_with_transactions(async_client: AsyncClient):
     # define a user
     new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
 
@@ -76,12 +56,7 @@ async def test_populate_queue_with_transactions(
 
     assert item_res.status_code == 201
 
-    # create test QueueManager
-    rabbit = test_queue_manager
-
     # create test transaction for plaid response
     plaid_client_response = {"total_transactions": 0}
     with patch.object(client, "transactions_get", return_value=plaid_client_response):
-        await populate_queue_with_transactions(rabbit)
-
-    assert len(rabbit.queue) == 1
+        await populate_queue_with_transactions()
