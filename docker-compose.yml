@@ -14,14 +14,10 @@ services:
       - /Users/sosaedison/Documents/GitHub/money-roundup/frontend:/app/frontend
 
   backend:
-    env_file:
-      - frontend/.env
-    image: moneyroundup
-    build:
-      context: ./src
-      dockerfile: ./Dockerfile
+    image: sosalosa/moneyroundup_backend
+    # build:
+    #   context: ./src
+    #   dockerfile: ./Dockerfile
     ports:
-      - 8000:8000
-    volumes:
-      - /Users/sosaedison/Documents/GitHub/money-roundup/src/moneyroundup:/app/moneyroundup
+      - 80:80
     restart: on-failure

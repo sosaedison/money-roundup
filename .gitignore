@@ -133,4 +133,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/settings.json
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
 .DS_Store
