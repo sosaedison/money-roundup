@@ -27,6 +27,7 @@ app.add_middleware(SessionMiddleware, secret_key="some-random-string")
 # Add Routers to Main FastAPI App
 app.include_router(api.api_router, prefix="/api")
 
+
 # status check stub for health checks
 @app.get("/api/status")
 def home():
