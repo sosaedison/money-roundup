@@ -7,7 +7,6 @@ from moneyroundup.api import api
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 from moneyroundup.settings import settings
 
-# Initialize application deps like RabbitMQ
 # setup_app()
 
 # Init the FastAPI app instance

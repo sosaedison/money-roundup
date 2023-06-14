@@ -62,8 +62,8 @@ class Settings(BaseSettings):
 
     FETCH_TRANSACTIONS_INTERVAL: str = os.getenv("FETCH_TRANSACTIONS_INTERVAL", "10")
 
-    RABBIT_HOST = os.getenv("RABBIT_HOST", "localhost")
-    RABBIT_QUEUE = os.getenv("RABBIT_QUEUE", "transactions_summary")
+
+
 
     DB_CONNECTION_STRING: str = "sqlite:///moneyroundup.db"
     DB_CONNECTION_STRING_ASYNC: str = "sqlite+aiosqlite:///moneyroundup.db"

@@ -1,12 +1,9 @@
 import logging
-import sys
 from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pika.exceptions import AMQPConnectionError
 
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
-from moneyroundup.rabbit_manager import RabbitManager
 from moneyroundup.settings import settings
 
 logging.basicConfig(
@@ -18,15 +15,6 @@ logging.basicConfig(
 
 def setup_app():
     if settings.ENV != "TEST":
-
-        try:
-            rabbit = RabbitManager(
-                host=settings.RABBIT_HOST, queue=settings.RABBIT_QUEUE
-            )
-        except AMQPConnectionError:
-            logging.critical("RABBITMQ FAILED TO CONNECT")
-            sys.exit(0)
-
         # Create the non-blocking Background scheduler
         scheduler = AsyncIOScheduler()
         # Run the fetch transactions job and run every 24 hours
@@ -34,6 +22,5 @@ def setup_app():
             populate_queue_with_transactions,
             "interval",
             seconds=int(settings.FETCH_TRANSACTIONS_INTERVAL),
-            kwargs={"queue": rabbit},
         )
         scheduler.start()

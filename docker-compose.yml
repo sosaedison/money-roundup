@@ -1,13 +1,17 @@
 version: '3.4'
 
 services:
-  # frontend:
-  #   image: sosalosa/moneyroundup_frontend
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 80:80
+  frontend:
+    env_file:
+      - src/.env
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - /Users/sosaedison/Documents/GitHub/money-roundup/frontend:/app/frontend
 
   backend:
     image: sosalosa/moneyroundup_backend
