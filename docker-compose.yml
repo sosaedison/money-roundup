@@ -10,14 +10,13 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
-    volumes:
-      - /Users/sosaedison/Documents/GitHub/money-roundup/frontend:/app/frontend
 
   backend:
-    image: sosalosa/moneyroundup_backend
-    # build:
-    #   context: ./src
-    #   dockerfile: ./Dockerfile
+    env_file:
+      - src/.env
+    image: backend
+    build:
+      context: ./src
+      dockerfile: ./Dockerfile
     ports:
-      - 80:80
-    restart: on-failure
+      - 8000:8000

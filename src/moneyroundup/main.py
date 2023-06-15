@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from moneyroundup import setup_app
-from moneyroundup.api import api
+from moneyroundup.api.api import api_router
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
+from moneyroundup.dependencies import _get_secret_value
 from moneyroundup.settings import settings
 
 # setup_app()
@@ -21,14 +22,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(SessionMiddleware, secret_key="some-random-string")
+app.add_middleware(
+    SessionMiddleware, secret_key=_get_secret_value(settings.APP_SECRET_KEY)
+)
 
 # Add Routers to Main FastAPI App
-app.include_router(api.api_router, prefix="/api")
+app.include_router(api_router, prefix="/api")
 
 
 # status check stub for health checks
-@app.get("/api/status")
+@app.get("/")
 def home():
     return {"online": True}
 

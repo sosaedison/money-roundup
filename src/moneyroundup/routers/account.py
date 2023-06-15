@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from moneyroundup.dependencies import get_current_user, get_db
 from moneyroundup.models import Item
 from moneyroundup.plaid_manager import client
-from moneyroundup.schemas import UserFromDB
+from moneyroundup.users import current_active_user
 
 router = APIRouter(prefix="/account", tags=["Account"])
 
@@ -16,13 +16,12 @@ router = APIRouter(prefix="/account", tags=["Account"])
 @router.get("")
 async def get_accounts(
     session: Session = Depends(get_db),
-    user: UserFromDB | None = Depends(get_current_user),
+    user=Depends(current_active_user),
 ):
     if not user:
         raise HTTPException(status_code=401, detail="User Not Found")
 
     with session.begin():
-
         items = session.query(Item).filter(Item.user_id == user.id).all()
         access_tokens: list[str] = [str(i.access_token) for i in items]
 

@@ -12,7 +12,6 @@ from fastapi_users.authentication import (
 from fastapi_users.db import SQLAlchemyUserDatabase
 
 from moneyroundup.database import OAuthAccount, User, get_user_db
-from moneyroundup.dependencies import generate_jwt
 from moneyroundup.services.email import EmailFactory, EmailService
 from moneyroundup.settings import settings
 

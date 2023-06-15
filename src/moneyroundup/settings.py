@@ -5,6 +5,8 @@ from pydantic import BaseSettings, SecretStr
 
 load_dotenv()
 
+PRODUCTION_BASE_URL = "https://moneyroundup.com"
+
 
 class Settings(BaseSettings):
     LOGGING_LEVEL: str = os.getenv("LOGGING_LEVEL", "INFO")
@@ -19,7 +21,9 @@ class Settings(BaseSettings):
     PRODUCTION_FORGOT_PASSWORD_REDIRECT_URL: str = os.getenv(
         "PRODUCTION_FORGOT_PASSWORD_REDIRECT_URL", ""
     )
-    APP_SECRET_KEY: str = os.getenv("APP_SECRET_KEY", "SUPER_SECRET_KEY")
+    APP_SECRET_KEY: SecretStr = SecretStr(
+        os.getenv("APP_SECRET_KEY", "SUPER_SECRET_KEY")
+    )
 
     EMAIL_SERVICE_USERNAME: str = os.getenv("EMAIL_SERVICE_USERNAME", "")
     EMAIL_SERVICE_PASSWORD: SecretStr = SecretStr(
@@ -61,9 +65,6 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "")
 
     FETCH_TRANSACTIONS_INTERVAL: str = os.getenv("FETCH_TRANSACTIONS_INTERVAL", "10")
-
-
-
 
     DB_CONNECTION_STRING: str = "sqlite:///moneyroundup.db"
     DB_CONNECTION_STRING_ASYNC: str = "sqlite+aiosqlite:///moneyroundup.db"
