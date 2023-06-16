@@ -49,7 +49,12 @@ def link_token_create(
 
 
 @router.post("/exchange/public/token")
-def exchange_public_token(payload: PublicTokenExchangeBody):
+def exchange_public_token(
+    payload: PublicTokenExchangeBody, user=Depends(current_active_user)
+):
+    if not user:
+        raise HTTPException(status_code=401, detail="User Not Found")
+
     exchange_request = ItemPublicTokenExchangeRequest(public_token=payload.public_token)
 
     exchange_response = client.item_public_token_exchange(exchange_request)
