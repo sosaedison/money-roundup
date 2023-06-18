@@ -20,6 +20,7 @@ def EmailFactory(env: str) -> EmailService:
     """
     Return an email service based on the given service type.
     """
+    print(env)
     email_service_by_env = {
         "DEV": LocalEmailService,
         "PRODUCTION": ProductionEmailService,
@@ -34,13 +35,66 @@ class ProductionEmailService:
     def __init__(self) -> None:
         self.ses_client = boto3.client("ses")
 
+    """
+    response = client.send_email(
+    Source='string',
+    Destination={
+        'ToAddresses': [
+            'string',
+        ],
+        'CcAddresses': [
+            'string',
+        ],
+        'BccAddresses': [
+            'string',
+        ]
+    },
+    Message={
+        'Subject': {
+            'Data': 'string',
+            'Charset': 'string'
+        },
+        'Body': {
+            'Text': {
+                'Data': 'string',
+                'Charset': 'string'
+            },
+            'Html': {
+                'Data': 'string',
+                'Charset': 'string'
+            }
+        }
+    },
+    ReturnPath='string',
+    SourceArn='string',
+    ReturnPathArn='string',
+    Tags=[
+        {
+            'Name': 'string',
+            'Value': 'string'
+        },
+    ],
+    ConfigurationSetName='string'
+)
+    """
+
     @staticmethod
     def send_email(
         to: str,
         subject: str = "This is an email subject",
         body: str = "This is an email body",
+        source: str = "no-reply@moneyroundup.com",
     ) -> None:
-        pass
+        res = boto3.client("ses").send_email(
+            Source=source,
+            Destination={"ToAddresses": [to]},
+            Message={
+                "Subject": {"Data": subject},
+                "Body": {"Text": {"Data": body}},
+            },
+        )
+        if res["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            raise Exception(f"Error sending email: {res}")
 
 
 class LocalEmailService:

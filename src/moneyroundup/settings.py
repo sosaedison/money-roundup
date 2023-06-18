@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     LOCAL_BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000/api")
     LOCAL_EMAIL_VERIFICATION_REDIRECT_URL: str = "http://localhost:3000"
     PRODUCTION_EMAIL_VERIFICATION_REDIRECT_URL: str = os.getenv(
-        "PRODUCTION_EMAIL_VERIFICATION_REDIRECT_URL", "https://localhost:3000"
+        "PRODUCTION_EMAIL_VERIFICATION_REDIRECT_URL", ""
     )
     LOCAL_FORGOT_PASSWORD_REDIRECT_URL: str = "http://localhost:3000/forgot-password"
     PRODUCTION_FORGOT_PASSWORD_REDIRECT_URL: str = os.getenv(
