@@ -20,7 +20,6 @@ def EmailFactory(env: str) -> EmailService:
     """
     Return an email service based on the given service type.
     """
-    print(env)
     email_service_by_env = {
         "DEV": LocalEmailService,
         "PRODUCTION": ProductionEmailService,
@@ -32,50 +31,48 @@ def EmailFactory(env: str) -> EmailService:
 
 
 class ProductionEmailService:
-    def __init__(self) -> None:
-        self.ses_client = boto3.client("ses")
 
     """
-    response = client.send_email(
-    Source='string',
-    Destination={
-        'ToAddresses': [
-            'string',
-        ],
-        'CcAddresses': [
-            'string',
-        ],
-        'BccAddresses': [
-            'string',
-        ]
-    },
-    Message={
-        'Subject': {
-            'Data': 'string',
-            'Charset': 'string'
+        response = client.send_email(
+        Source='string',
+        Destination={
+            'ToAddresses': [
+                'string',
+            ],
+            'CcAddresses': [
+                'string',
+            ],
+            'BccAddresses': [
+                'string',
+            ]
         },
-        'Body': {
-            'Text': {
+        Message={
+            'Subject': {
                 'Data': 'string',
                 'Charset': 'string'
             },
-            'Html': {
-                'Data': 'string',
-                'Charset': 'string'
+            'Body': {
+                'Text': {
+                    'Data': 'string',
+                    'Charset': 'string'
+                },
+                'Html': {
+                    'Data': 'string',
+                    'Charset': 'string'
+                }
             }
-        }
-    },
-    ReturnPath='string',
-    SourceArn='string',
-    ReturnPathArn='string',
-    Tags=[
-        {
-            'Name': 'string',
-            'Value': 'string'
         },
-    ],
-    ConfigurationSetName='string'
-)
+        ReturnPath='string',
+        SourceArn='string',
+        ReturnPathArn='string',
+        Tags=[
+            {
+                'Name': 'string',
+                'Value': 'string'
+            },
+        ],
+        ConfigurationSetName='string'
+    )
     """
 
     @staticmethod
@@ -85,7 +82,8 @@ class ProductionEmailService:
         body: str = "This is an email body",
         source: str = "no-reply@moneyroundup.com",
     ) -> None:
-        res = boto3.client("ses").send_email(
+        ses_client = boto3.client("ses")
+        ses_client.send_email(
             Source=source,
             Destination={"ToAddresses": [to]},
             Message={
@@ -93,8 +91,6 @@ class ProductionEmailService:
                 "Body": {"Text": {"Data": body}},
             },
         )
-        if res["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise Exception(f"Error sending email: {res}")
 
 
 class LocalEmailService:
