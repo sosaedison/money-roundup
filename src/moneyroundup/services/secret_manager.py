@@ -3,19 +3,18 @@
 # or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developer/language/python/
 
+from json import loads
+from typing import Optional, Union
+
 import boto3
 from botocore.exceptions import ClientError
 
 
 class SecretManager:
     @staticmethod
-    def get_secret(secret_name: str, region_name: str = "us-east-1") -> str:
-        secret_name = "Moneyroundup_app_secret_key"
-        region_name = "us-east-1"
-
+    def get_secret(secret_name: str) -> Union[str, dict[str, str]]:
         # Create a Secrets Manager client
-        session = boto3.session.Session()
-        client = session.client(service_name="secretsmanager", region_name=region_name)
+        client = boto3.client("secretsmanager")
 
         try:
             get_secret_value_response = client.get_secret_value(SecretId=secret_name)
@@ -25,8 +24,6 @@ class SecretManager:
             raise e
 
         # Decrypts secret using the associated KMS key.
-        secret = get_secret_value_response["SecretString"]
-
-        # Your code goes here.
+        secret = loads(get_secret_value_response["SecretString"])["secret"]
 
         return secret

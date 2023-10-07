@@ -3,7 +3,7 @@
   "python.testing.pytestArgs": ["src"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "cSpell.words": ["httpx", "UUIDID"],
+  "cSpell.words": ["boto", "botocore", "httpx", "UUIDID"],
   "peacock.color": "green",
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"

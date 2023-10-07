@@ -12,8 +12,10 @@ from fastapi_users.authentication import (
 from fastapi_users.db import SQLAlchemyUserDatabase
 
 from moneyroundup.database import OAuthAccount, User, get_user_db
-from moneyroundup.services.email import EmailFactory, EmailService
-from moneyroundup.settings import settings
+from moneyroundup.services.email import EmailFactory
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     )
     verification_token_audience = settings.EMAIL_VERIFICATION_TOKEN_AUDIENCE
 
-    email_service: EmailService = EmailFactory(env=settings.EMAIL_SERVICE_TYPE)
+    email_service = EmailFactory(env=settings.EMAIL_SERVICE_TYPE)
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         welcome_email_text = f"""Welcome to Money Roundup,{user.first_name}! \n\n You can expect a follow up email from us to verify your email.\n\n Please verify your email so you can receive your daily spending notices! 🙃"""
@@ -58,7 +60,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     ):
         # What we'd want to do here is formulate an email to the user with a link to reset their password.
 
-        reset_password_email_text = f"""Please reset your password by clicking the link below:\n\n{settings.LOCAL_BACKEND_URL}/auth/forgot-password?token={token}\n\nThanks!\n\nThe Money Roundup Team"""
+        reset_password_email_text = f"""Please reset your password by clicking the link below:\n\n{settings.BACKEND_URL}/auth/forgot-password?token={token}\n\nThanks!\n\nThe Money Roundup Team"""
         subject = "Reset your password with Money Roundup"
 
         try:
@@ -78,7 +80,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     ):
         # What we'd want to do here is formulate an email to the user with a link to verify their email.
 
-        verification_email_text = f"""Please verify your email address by clicking the link below:\n\n{settings.LOCAL_BACKEND_URL}/auth/verify?token={token}\n\n(You'll need to verify before you can receive any emails)\n\nThanks!\n\nThe Money Roundup Team"""
+        verification_email_text = f"""Please verify your email address by clicking the link below:\n\n{settings.BACKEND_URL}/auth/verify?token={token}\n\n(You'll need to verify before you can receive any emails)\n\nThanks!\n\nThe Money Roundup Team"""
         subject = "Verify your email with Money Roundup"
 
         try:

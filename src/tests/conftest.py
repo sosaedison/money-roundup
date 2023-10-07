@@ -7,8 +7,11 @@ from pytest import fixture
 
 os.environ["ENV"] = "TEST"
 
+from moneyroundup.dependencies import _get_secret_value
 from moneyroundup.main import app
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 
 @fixture
@@ -31,5 +34,7 @@ def decode_token(token: str) -> str:
     from jose import jwt
 
     return jwt.decode(
-        token, settings.APP_SECRET_KEY, algorithms=settings.JWT_ALGORITHM
+        token,
+        key=_get_secret_value(settings.APP_SECRET_KEY),
+        algorithms=settings.JWT_ALGORITHM,
     )["sub"]

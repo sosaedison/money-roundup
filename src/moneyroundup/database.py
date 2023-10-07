@@ -12,7 +12,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker
 
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 
 class Base(DeclarativeBase):
@@ -37,7 +39,9 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 engine = create_engine(settings.DB_CONNECTION_STRING, echo=False)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
-async_engine = create_async_engine(settings.DB_CONNECTION_STRING_ASYNC, echo=False)
+async_engine = create_async_engine(
+    settings.DB_CONNECTION_STRING_ASYNC, echo=settings.DB_ECHO
+)
 async_session_maker = async_sessionmaker(async_engine, expire_on_commit=False)
 
 

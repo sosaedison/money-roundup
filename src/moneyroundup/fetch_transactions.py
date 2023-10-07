@@ -25,7 +25,7 @@ def yesterdays_date():
     return yesterday.date()
 
 
-def fetch_transactions(access_token: str) -> int:
+def fetch_total_transactions(access_token: str) -> int:
     request = TransactionsGetRequest(
         access_token=access_token,
         start_date=two_days_ago(),
@@ -57,4 +57,6 @@ async def populate_queue_with_transactions(session=get_async_session_context_man
 
             total_transactions = 0
             for access_token in access_tokens:
-                total_transactions += fetch_transactions(access_token=access_token)
+                total_transactions += fetch_total_transactions(
+                    access_token=access_token
+                )

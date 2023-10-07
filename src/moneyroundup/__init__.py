@@ -4,7 +4,9 @@ from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from moneyroundup.fetch_transactions import populate_queue_with_transactions
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 logging.basicConfig(
     filename=f"moneyroundup-{datetime.now().strftime('%m-%d-%Y')}.log",
@@ -17,10 +19,10 @@ def setup_app():
     if settings.ENV != "TEST":
         # Create the non-blocking Background scheduler
         scheduler = AsyncIOScheduler()
-        # Run the fetch transactions job and run every 24 hours
+        # add the fetch transactions job and run every 24 hours
         scheduler.add_job(
             populate_queue_with_transactions,
             "interval",
-            seconds=int(settings.FETCH_TRANSACTIONS_INTERVAL),
+            seconds=settings.FETCH_TRANSACTIONS_INTERVAL,
         )
         scheduler.start()

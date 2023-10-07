@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "moneyroundup_backend",
-      "image": "sosalosa/moneyroundup_backend:sample",
+      "image": "sosalosa/moneyroundup_backend:latest",
       "essential": true,
       "memory": 128,
       "portMappings": [

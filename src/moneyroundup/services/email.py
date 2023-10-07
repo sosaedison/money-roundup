@@ -5,7 +5,9 @@ from typing import Protocol
 import boto3
 
 from moneyroundup.dependencies import _get_secret_value
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 
 class EmailService(Protocol):
@@ -13,7 +15,6 @@ class EmailService(Protocol):
         """
         Send an email to the given email address with the given subject and body.
         """
-        ...
 
 
 def EmailFactory(env: str) -> EmailService:
@@ -27,7 +28,8 @@ def EmailFactory(env: str) -> EmailService:
 
     if env not in email_service_by_env:
         raise KeyError(f"Invalid email service type: {env}")
-    return email_service_by_env.get(env, LocalEmailService)
+
+    return email_service_by_env[env]
 
 
 class ProductionEmailService:

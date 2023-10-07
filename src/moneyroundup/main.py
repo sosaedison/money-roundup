@@ -6,7 +6,9 @@ from moneyroundup import setup_app
 from moneyroundup.api.api import api_router
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 from moneyroundup.dependencies import _get_secret_value
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 # setup_app()
 
@@ -33,7 +35,12 @@ app.include_router(api_router, prefix="/api")
 # status check stub for health checks
 @app.get("/")
 def home():
-    return {"online": True}
+    return {
+        "online": True,
+        "status": "OK",
+        "message": "Hello World",
+        "settings": settings.dict(),
+    }
 
 
 @app.on_event("startup")

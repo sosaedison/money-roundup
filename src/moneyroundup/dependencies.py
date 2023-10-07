@@ -11,7 +11,9 @@ from sqlalchemy.orm import Session
 from moneyroundup.database import SessionLocal, async_session_maker
 from moneyroundup.models import UserOld
 from moneyroundup.schemas import UserFromDB
-from moneyroundup.settings import settings
+from moneyroundup.settings import get_settings
+
+settings = get_settings()
 
 SecretType = Union[str, SecretStr]
 

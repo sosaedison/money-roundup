@@ -18,14 +18,6 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({
     setIsSignUp(value);
   };
 
-  // prefill email if provided in URL from email verification success
-  let userEmail: string | null | undefined = new URLSearchParams(
-    window.location.search
-  ).get("email");
-  if (userEmail === null) {
-    userEmail = undefined;
-  }
-
   return (
     <div className="flex items-center bg-zinc-900">
       <div className="">
@@ -46,12 +38,7 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({
         <div className="form-container">
           {!isSignUp ? (
             <form onSubmit={handleSignIn} className="form">
-              <input
-                type="email"
-                placeholder="Email"
-                value={userEmail}
-                required
-              />
+              <input type="email" placeholder="Email" required />
               <input type="password" placeholder="Password" required />
               <button type="submit">Sign In</button>
               <button type="button" onClick={routeToForgotPassword}>

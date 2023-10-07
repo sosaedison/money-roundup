@@ -93,16 +93,13 @@ async def verify(
     """
     if not payload:
         return RedirectResponse(
-            url=f"{settings.LOCAL_EMAIL_VERIFICATION_REDIRECT_URL}/verification-error",
+            url=f"{settings.EMAIL_VERIFICATION_REDIRECT_URL}/verification-error",
             status_code=308,
         )
 
     async with async_db_session as session:
-        redirect_url = (
-            settings.LOCAL_EMAIL_VERIFICATION_REDIRECT_URL
-            if settings.ENV == "DEV"
-            else settings.PRODUCTION_EMAIL_VERIFICATION_REDIRECT_URL
-        )
+        redirect_url = settings.EMAIL_VERIFICATION_REDIRECT_URL
+
         try:
             user = await session.execute(select(User).where(User.id == payload["sub"]))
             user = user.scalars().first()
@@ -118,7 +115,7 @@ async def verify(
             )
 
     return RedirectResponse(
-        url=f"{redirect_url}/verification-success?email={payload['email']}",
+        url=f"{redirect_url}/verification-success",
         status_code=308,
     )
 
@@ -131,11 +128,7 @@ async def forgot_password(
     """
     Given a valid jwt token, redirect the user to the forgot password page.
     """
-    redirect_url = (
-        settings.LOCAL_FORGOT_PASSWORD_REDIRECT_URL
-        if settings.ENV == "DEV"
-        else settings.PRODUCTION_FORGOT_PASSWORD_REDIRECT_URL
-    )
+    redirect_url = settings.FORGOT_PASSWORD_REDIRECT_URL
 
     if not payload:
         return RedirectResponse(

@@ -12,6 +12,8 @@ import {
   usePlaidLink,
 } from "react-plaid-link";
 
+const ACCESS_TOKEN_KEY = "moneyroundup_access_token";
+
 export default function Root() {
   const [user, setUser] = useState();
   const [email, setEmail] = useState(null);
@@ -22,14 +24,13 @@ export default function Root() {
   useEffect(() => {
     // check if user is logged in
     // check local storage for access token
-    const accessToken = localStorage.getItem("moneyroundup_access_token");
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (accessToken) {
       // fetch user data
       const isTokenValid = async () => {
         try {
           const data = await getUserInfo(accessToken);
-          // token is valid
-          // set user data
+          // token is valid so set user data
           setEmail(data["email"]);
           setUserID(data["id"]);
         } catch (error) {
@@ -63,7 +64,7 @@ export default function Root() {
   }
 
   function cleanUserData() {
-    localStorage.removeItem("moneyroundup_access_token");
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
     setUserID(null);
     setEmail(null);
   }
@@ -103,8 +104,24 @@ export default function Root() {
     },
     [userID]
   );
+  async function fetchLinkToken() {
+    await fetch("http://127.0.0.1:8000/api/link/token/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+        Authorization:
+          "Bearer " + localStorage.getItem("moneyroundup_access_token"),
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data["link_token"]);
+        setToken(data["link_token"]);
+      })
+      .catch((err) => console.log(err));
+  }
   const onExit = useCallback(async () => {}, []);
-
   const config: PlaidLinkOptions = {
     onSuccess,
     onExit,
@@ -233,7 +250,11 @@ export default function Root() {
       {userID && (
         <>
           <button onClick={(e) => handleSignOut(e)}>Sign Out</button>
-          <PlaidLink ready={ready} open={open} />
+          <PlaidLink
+            ready={ready}
+            open={open}
+            fetchLinkToken={fetchLinkToken}
+          />
 
           <AccountItemList accounts={accounts} />
         </>
