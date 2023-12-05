@@ -4,7 +4,7 @@
 # https://aws.amazon.com/developer/language/python/
 
 from json import loads
-from typing import Optional, Union
+from typing import Union
 
 import boto3
 from botocore.exceptions import ClientError

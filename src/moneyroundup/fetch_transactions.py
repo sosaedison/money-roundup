@@ -3,11 +3,10 @@ import datetime
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from moneyroundup.database import User, get_async_session_context_manager
 from moneyroundup.dependencies import get_db
-from moneyroundup.models import Item, UserOld
+from moneyroundup.models import Item
 from moneyroundup.plaid_manager import client
 
 db = get_db()

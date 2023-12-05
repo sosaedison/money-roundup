@@ -12,7 +12,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.products import Products
 
 from moneyroundup.plaid_manager import client
-from moneyroundup.schemas import PublicTokenExchangeBody, UserFromDB
+from moneyroundup.schemas import PublicTokenExchangeBody
 from moneyroundup.users import current_active_user
 
 router = APIRouter(tags=["Link Token"])

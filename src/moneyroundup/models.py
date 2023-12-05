@@ -1,9 +1,5 @@
-from fastapi_users.db import (
-    SQLAlchemyBaseOAuthAccountTableUUID,
-    SQLAlchemyBaseUserTableUUID,
-)
 from sqlalchemy import Boolean, Column, ForeignKey, String
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import relationship
 
 from moneyroundup.database import Base
 

@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 
 import pytest
@@ -44,7 +43,7 @@ async def test_user_register_and_access_their_info(async_client: AsyncClient):
 
     # get the user from the database
     client_res = await async_client.get(
-        f"/api/auth/users/me",
+        "/api/auth/users/me",
         headers={"Authorization": f"Bearer {access_token}"},
     )
     registered_user = client_res.json()

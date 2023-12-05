@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
@@ -63,7 +62,7 @@ async def test_request_link_token_with_invalid_jwt(async_client: AsyncClient):
     ):
         link_token_res = await async_client.post(
             "/api/link/token/create",
-            headers={"Authorization": f"Bearer SIKE"},  # <--- Invalid JWT
+            headers={"Authorization": "Bearer SIKE"},  # <--- Invalid JWT
         )
 
     assert link_token_res.status_code == 401

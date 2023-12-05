@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from moneyroundup import setup_app
 from moneyroundup.api.api import api_router
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
 from moneyroundup.dependencies import _get_secret_value

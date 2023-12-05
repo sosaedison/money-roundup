@@ -7,9 +7,9 @@ from pytest import fixture
 
 os.environ["ENV"] = "TEST"
 
-from moneyroundup.dependencies import _get_secret_value
-from moneyroundup.main import app
-from moneyroundup.settings import get_settings
+from moneyroundup.dependencies import _get_secret_value  # noqa: E402
+from moneyroundup.main import app  # noqa: E402
+from moneyroundup.settings import get_settings  # noqa: E402
 
 settings = get_settings()
 

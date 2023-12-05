@@ -1,8 +1,7 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator
 
 from fastapi import Depends
-from fastapi_users.authentication import AuthenticationBackend
 from fastapi_users.db import (
     SQLAlchemyBaseOAuthAccountTableUUID,
     SQLAlchemyBaseUserTableUUID,
@@ -10,7 +9,7 @@ from fastapi_users.db import (
 )
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from moneyroundup.settings import get_settings
 

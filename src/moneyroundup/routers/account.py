@@ -3,11 +3,8 @@ import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_get_response import AccountsGetResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from moneyroundup.database import get_async_session_context_manager
-from moneyroundup.dependencies import get_current_user, get_db
 from moneyroundup.models import Item
 from moneyroundup.plaid_manager import client
 from moneyroundup.users import current_active_user
