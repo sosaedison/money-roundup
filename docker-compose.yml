@@ -1,22 +1,67 @@
-version: '3.4'
+version: '3.7'
 
 services:
+  postgres:
+    env_file:
+      - src/.env
+    container_name: moneyroundup_db
+    image: postgres:latest
+    networks:
+      - moneyroundup_net
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   frontend:
+    container_name: moneyroundup_frontend
     env_file:
       - src/.env
     image: frontend
+    networks:
+      - moneyroundup_net
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
     ports:
       - 3000:3000
 
   backend:
+    container_name: moneyroundup_backend
+    restart: always
     env_file:
       - src/.env
     image: backend
     build:
       context: ./src
       dockerfile: ./Dockerfile
+    networks:
+      - moneyroundup_net
+    volumes:
+      - ./src:/home/app
+    healthcheck:
+      test: curl -o /dev/null -I http://localhost:8080
+      interval: 60s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
-      - 8000:8000
+      - 8080:8080
+      - 5678:5678
+
+volumes:
+  pg_data:
+
+networks:
+  moneyroundup_net:
+    driver: bridge

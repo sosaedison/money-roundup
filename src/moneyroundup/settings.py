@@ -1,7 +1,8 @@
 import os
 
 from dotenv import load_dotenv
-from pydantic import BaseSettings, SecretStr
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings
 
 from moneyroundup.services.secret_manager import SecretManager
 
@@ -14,7 +15,7 @@ secret_manager = SecretManager()
 class Settings(BaseSettings):
     """Base Settings"""
 
-    ENV = os.getenv("ENV", "DEV")
+    ENV: str = os.getenv("ENV", "DEV")
     LOGGING_LEVEL: str = os.getenv("LOGGING_LEVEL", "INFO")
     PROJECT_TITLE: str = os.getenv("PROJECT_TITLE", "MONEY_ROUND_UP")
     APP_SECRET_KEY: SecretStr = SecretStr(
@@ -59,7 +60,7 @@ class Settings(BaseSettings):
     JWT_SECRET: SecretStr = SecretStr(
         os.getenv("JWT_SECRET", "AWSSECRET_JWT_SECRET_KEY")
     )
-    ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS", 30))
+    ACCESS_TOKEN_EXPIRE_SECONDS: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS", 30))
 
     PLAID_SANDBOX_KEY: str = os.getenv("PLAID_SANDBOX_KEY", "")
     PLAID_CLIENT_ID: str = os.getenv("PLAID_CLIENT_ID", "")
@@ -73,7 +74,7 @@ class Settings(BaseSettings):
     )
 
     DB_CONNECTION_STRING: str = os.getenv(
-        "AWSSECRET_DB_CONNECTION_STRING", "sqlite:///moneyroundup.db"
+        "AWSSECRET_DB_CONNECTION_STRING", "postgresql+asyncpg://moneyroundup:password@db:5432/moneyroundup"
     )
     DB_CONNECTION_STRING_ASYNC: str = os.getenv(
         "AWSSECRET_DB_CONNECTION_STRING_ASYNC", "sqlite+aiosqlite:///moneyroundup.db"
@@ -88,7 +89,7 @@ class DevSettings(Settings):
 class ProdSettings(Settings):
     """Settings for Production Environment"""
 
-    ENV = os.getenv("ENV", "DEV")
+    ENV: str = os.getenv("ENV", "DEV")
     if ENV == "PROD":
         LOGGING_LEVEL: str = "ERROR"
         _BASE_URL: str = os.getenv("BASE_URL", "https://moneyroundup.com")
@@ -127,6 +128,6 @@ class TestSettings(Settings):
 
 
 def get_settings() -> Settings:
-    ENV = os.getenv("ENV", "DEV")
+    ENV: str = os.getenv("ENV", "DEV")
     settings_options = {"DEV": DevSettings, "PROD": ProdSettings, "TEST": TestSettings}
     return settings_options.get(ENV, DevSettings)()
