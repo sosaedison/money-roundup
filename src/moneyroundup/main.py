@@ -12,6 +12,7 @@ from moneyroundup.settings import get_settings
 settings = get_settings()
 
 # setup_app()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Recreating database tables")

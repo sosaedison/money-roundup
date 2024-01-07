@@ -1,10 +1,8 @@
 interface Props {
-  open: Function;
-  ready: boolean;
   fetchLinkToken: Function;
 }
 
-export default function PlaidLink({ open, ready, fetchLinkToken }: Props) {
+export default function PlaidLink({fetchLinkToken }: Props) {
   return (
     <button onClick={() => fetchLinkToken()}>
       <strong>Link account</strong>

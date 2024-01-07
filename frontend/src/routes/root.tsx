@@ -71,7 +71,7 @@ export default function Root() {
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(
     async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
-      await fetch("http://127.0.0.1:8000/exchange/public/token", {
+      await fetch(`${import.meta.env.VITE_LOCAL_BASE_BACKEND_URL}/api/exchange/public/token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ export default function Root() {
     [userID]
   );
   async function fetchLinkToken() {
-    await fetch("http://127.0.0.1:8000/api/link/token/create", {
+    await fetch(`${import.meta.env.VITE_LOCAL_BASE_BACKEND_URL}/api/link/token/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -128,6 +128,9 @@ export default function Root() {
     token,
   };
   const { open, ready, exit, error } = usePlaidLink(config);
+  if (ready && token) {
+    open();
+  }
 
   function handleSignOut(event: any) {
     event.preventDefault();

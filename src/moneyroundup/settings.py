@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     )
 
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000/api")
+    BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8080/api")
 
     EMAIL_SERVICE_USERNAME: str = os.getenv("EMAIL_SERVICE_USERNAME", "")
     EMAIL_SERVICE_PASSWORD: SecretStr = SecretStr(
