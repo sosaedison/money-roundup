@@ -2,8 +2,11 @@ version: '3.7'
 
 services:
   postgres:
-    env_file:
-      - src/.env
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=moneyroundup
+      - POSTGRES_DB=moneyroundup
     container_name: moneyroundup_db
     image: postgres:latest
     networks:
@@ -13,26 +16,10 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
-      interval: 10s
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U moneyroundup -d moneyroundup'"]
+      interval: 1s
       timeout: 3s
       retries: 3
-
-  frontend:
-    container_name: moneyroundup_frontend
-    env_file:
-      - src/.env
-    image: frontend
-    networks:
-      - moneyroundup_net
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - 3000:3000
 
   backend:
     container_name: moneyroundup_backend

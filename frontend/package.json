@@ -23,6 +23,7 @@
     "yarn": "^1.22.19"
   },
   "devDependencies": {
+    "@esbuild/darwin-arm64": "^0.19.11",
     "@types/react": "^18.0.35",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",

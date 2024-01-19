@@ -6,6 +6,9 @@ import PlaidLink from "../PlaidLink";
 import UserAuthModal from "../UserAuthModal";
 
 import {
+  PlaidLinkError,
+  PlaidLinkOnEvent,
+  PlaidLinkOnExit,
   PlaidLinkOnSuccess,
   PlaidLinkOnSuccessMetadata,
   PlaidLinkOptions,
@@ -18,7 +21,7 @@ export default function Root() {
   const [user, setUser] = useState();
   const [email, setEmail] = useState(null);
   const [token, setToken] = useState(null);
-  const [userID, setUserID] = useState(null);
+  const [userID, setUserID] = useState<string | null>(null);
   const [accounts, setAccounts] = useState(Array);
 
   useEffect(() => {
@@ -33,6 +36,7 @@ export default function Root() {
           // token is valid so set user data
           setEmail(data["email"]);
           setUserID(data["id"]);
+          fetchLinkToken();
         } catch (error) {
           // token is invalid
           cleanUserData();
@@ -57,7 +61,7 @@ export default function Root() {
     );
 
     if (res.status !== 200) {
-      throw new Error("Get userInfo was not ok");
+      throw new Error("Failed to get user info");
     }
     const data = await res.json();
     return data;
@@ -67,6 +71,26 @@ export default function Root() {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     setUserID(null);
     setEmail(null);
+  }
+
+  async function createItem(userID: string | null, accessToken: string): Promise<boolean> {
+    const res = await fetch(`${import.meta.env.VITE_LOCAL_BASE_BACKEND_URL}/api/item/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: userID, access_token: accessToken }),
+    })
+
+    if (res.status !== 200) {
+      return false;
+    }
+
+    const data = await res.json();
+    if (data["item_created"]) {
+      return true;
+    }
+    return false;
   }
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(
@@ -79,25 +103,13 @@ export default function Root() {
         body: JSON.stringify({ public_token: publicToken }),
       })
         .then((res) => res.json())
-        .then((data) => {
+        .then(async (data) => {
           if (data["access_token_created"] === true) {
-            fetch(`${import.meta.env.VITE_LOCAL_BASE_BACKEND_URL}/item`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                user_id: userID,
-                access_token: data["access_token"],
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data["item_created"]) {
-                  fetchAccounts();
-                }
-              })
-              .catch((err) => console.log(err));
+            const itemCreated = await createItem(userID, data["access_token"]);
+
+            if (itemCreated) {
+              fetchAccounts();
+            }
           }
         })
         .catch((err) => alert("Failed to get access_token"));
@@ -116,20 +128,18 @@ export default function Root() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data["link_token"]);
         setToken(data["link_token"]);
       })
       .catch((err) => console.log(err));
   }
-  const onExit = useCallback(async () => {}, []);
-  const config: PlaidLinkOptions = {
-    onSuccess,
-    onExit,
-    token,
-  };
-  const { open, ready, exit, error } = usePlaidLink(config);
-  if (ready && token) {
-    open();
+  const onExit: PlaidLinkOnExit = async (error: PlaidLinkError | null) => {
+    if (error != null) {
+      console.log("Error: ", error);
+    }
+  }
+
+  const onEvent: PlaidLinkOnEvent = async (eventName: string, metadata: any) => {
+    console.info("onEvent: ", eventName, metadata);
   }
 
   function handleSignOut(event: any) {
@@ -238,6 +248,15 @@ export default function Root() {
       })
       .catch((err) => console.error(err));
   };
+
+  const config: PlaidLinkOptions = {
+    onSuccess,
+    onExit,
+    onEvent,
+    token
+  };
+  const { open, ready, exit, error } = usePlaidLink(config);
+
   return (
     <div className="App">
       {!userID && (
@@ -254,9 +273,8 @@ export default function Root() {
         <>
           <button onClick={(e) => handleSignOut(e)}>Sign Out</button>
           <PlaidLink
-            ready={ready}
             open={open}
-            fetchLinkToken={fetchLinkToken}
+            ready={ready}
           />
 
           <AccountItemList accounts={accounts} />
