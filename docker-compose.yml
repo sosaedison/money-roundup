@@ -17,8 +17,8 @@ services:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U moneyroundup -d moneyroundup'"]
-      interval: 1s
-      timeout: 3s
+      interval: 3s
+      timeout: 2s
       retries: 3
 
   backend:

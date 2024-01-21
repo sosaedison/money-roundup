@@ -4,7 +4,7 @@ from typing import Protocol
 
 import boto3
 
-from moneyroundup.dependencies import _get_secret_value
+from moneyroundup.dependencies import get_secret_value
 from moneyroundup.settings import get_settings
 
 settings = get_settings()
@@ -114,6 +114,6 @@ class LocalEmailService:
             smtp.starttls()
             smtp.login(
                 settings.EMAIL_SERVICE_USERNAME,
-                _get_secret_value(settings.EMAIL_SERVICE_PASSWORD),
+                get_secret_value(settings.EMAIL_SERVICE_PASSWORD),
             )
             smtp.send_message(msg)

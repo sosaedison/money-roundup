@@ -255,7 +255,7 @@ export default function Root() {
     onEvent,
     token
   };
-  const { open, ready, exit, error } = usePlaidLink(config);
+  const { open, ready } = usePlaidLink(config);
 
   return (
     <div className="App">

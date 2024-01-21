@@ -34,7 +34,7 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def _get_secret_value(secret: SecretType) -> str:
+def get_secret_value(secret: SecretType) -> str:
     if isinstance(secret, SecretStr):
         return secret.get_secret_value()
     return secret
@@ -56,7 +56,7 @@ def generate_jwt(
 
     return jwt.encode(
         payload,
-        _get_secret_value(secret),
+        get_secret_value(secret),
         algorithm=settings.JWT_ALGORITHM,
     )
 
@@ -69,7 +69,7 @@ def decode_jwt(
 ) -> Dict[str, Any]:
     return jwt.decode(
         encoded_jwt,
-        _get_secret_value(secret),
+        get_secret_value(secret),
         audience=audience,
         algorithms=algorithms,
     )
@@ -83,7 +83,7 @@ def validate_creds(request: Request) -> dict[str, Any] | None:
             token = auth[7:]
             return jwt.decode(
                 token,
-                _get_secret_value(settings.APP_SECRET_KEY),
+                get_secret_value(settings.APP_SECRET_KEY),
                 algorithms=[settings.JWT_ALGORITHM],
             )
     except KeyError:

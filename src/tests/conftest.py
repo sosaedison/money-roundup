@@ -7,7 +7,7 @@ from pytest import fixture
 
 os.environ["ENV"] = "TEST"
 
-from moneyroundup.dependencies import _get_secret_value  # noqa: E402
+from moneyroundup.dependencies import get_secret_value  # noqa: E402
 from moneyroundup.main import app  # noqa: E402
 from moneyroundup.settings import get_settings  # noqa: E402
 
@@ -35,6 +35,6 @@ def decode_token(token: str) -> str:
 
     return jwt.decode(
         token,
-        key=_get_secret_value(settings.APP_SECRET_KEY),
+        key=get_secret_value(settings.APP_SECRET_KEY),
         algorithms=settings.JWT_ALGORITHM,
     )["sub"]

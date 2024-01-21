@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from moneyroundup.api.api import api_router
 from moneyroundup.database import create_db_and_tables, drop_db_and_tables
-from moneyroundup.dependencies import _get_secret_value
+from moneyroundup.dependencies import get_secret_value
 from moneyroundup.settings import get_settings
 
 settings = get_settings()
@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(
-    SessionMiddleware, secret_key=_get_secret_value(settings.APP_SECRET_KEY)
+    SessionMiddleware, secret_key=get_secret_value(settings.APP_SECRET_KEY)
 )
 
 # Add Routers to Main FastAPI App
