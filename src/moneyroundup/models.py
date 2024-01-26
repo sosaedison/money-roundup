@@ -1,30 +1,29 @@
-from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from fastapi_users.db import (
+    SQLAlchemyBaseUserTableUUID,
+)
+from sqlalchemy import JSON, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from moneyroundup.database import Base
 
 
-class UserOld(Base):
-    __tablename__ = "old_users"
-
-    id = Column(String, primary_key=True, index=True)
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, index=True, nullable=False)
-    profile_pic_url = Column(String)
-    items = relationship("Item")
+class User(SQLAlchemyBaseUserTableUUID, Base):
+    # oauth_accounts: Mapped[List[OAuthAccount]] = relationship(
+    #     "OAuthAccount", lazy="joined"
+    # )
+    first_name: Mapped[str] = mapped_column(nullable=True)
+    last_name: Mapped[str] = mapped_column(nullable=True)
 
     def __str__(self) -> str:
-        return f"User<{self.first_name} | {self.last_name} | {self.email} | {self.id}>"
-
+        return f"USER({self.first_name} | {self.email} | {self.is_active})"
 
 class Item(Base):
     __tablename__ = "items"
 
-    id = Column(String, primary_key=True)
-    user_id = Column(ForeignKey("old_users.id"))
-    access_token = Column(String)
-    active = Column(Boolean, default=True)
+    id: Mapped[str] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.id"))
+    access_token: Mapped[str] = mapped_column()
+    active: Mapped[bool] = mapped_column(default=True)
 
     def __str__(self) -> str:
         return f"Item<{self.id}> | | {self.access_token} | {self.active}>"

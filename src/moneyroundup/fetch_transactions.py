@@ -4,9 +4,9 @@ from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from sqlalchemy import select
 
-from moneyroundup.database import User, get_async_session_context_manager
+from moneyroundup.database import get_async_session_context_manager
 from moneyroundup.dependencies import get_db
-from moneyroundup.models import Item
+from moneyroundup.models import Item, User
 from moneyroundup.plaid_manager import client
 
 db = get_db()
@@ -39,7 +39,6 @@ def fetch_total_transactions(access_token: str) -> int:
 
 async def populate_queue_with_transactions(session=get_async_session_context_manager):
     async with session() as session:
-        # users: list[UserOld] = session.query(UserOld).all()
         result = await session.execute(select(User))
         users = [{"id": u.id, "email": u.email} for u in result.scalars()]
 

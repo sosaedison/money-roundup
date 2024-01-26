@@ -60,3 +60,6 @@ class UserRequestingLinkToken(BaseModel):
 class LinkTokenForUser(BaseModel):
     link_token: str
     user_id: str
+
+class Goal(BaseModel):
+    goal: list[dict[str, str]]

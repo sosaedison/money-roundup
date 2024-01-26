@@ -7,8 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from moneyroundup import settings
-from moneyroundup.database import User, get_async_session_context_manager
+from moneyroundup.database import get_async_session_context_manager
 from moneyroundup.dependencies import decode_jwt
+from moneyroundup.models import User
 from moneyroundup.schemas import UserCreate, UserRead, UserUpdate
 from moneyroundup.users import auth_backend, fastapi_users
 

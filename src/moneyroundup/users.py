@@ -11,7 +11,9 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from moneyroundup.database import OAuthAccount, User, get_user_db
+from moneyroundup.database import OAuthAccount
+from moneyroundup.dependencies import get_user_db
+from moneyroundup.models import User
 from moneyroundup.services.email import EmailFactory
 from moneyroundup.settings import get_settings
 

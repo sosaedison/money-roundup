@@ -3,14 +3,19 @@ from datetime import datetime, timedelta
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Union
 
 from fastapi import Depends, HTTPException, Request
+from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from moneyroundup.database import SessionLocal, async_session_maker
-from moneyroundup.models import UserOld
-from moneyroundup.schemas import UserFromDB
+from moneyroundup.database import (
+    OAuthAccount,
+    SessionLocal,
+    async_session_maker,
+    get_async_session,
+)
+from moneyroundup.models import User
 from moneyroundup.settings import get_settings
 
 settings = get_settings()
@@ -94,15 +99,5 @@ def validate_creds(request: Request) -> dict[str, Any] | None:
         raise HTTPException(status_code=401, detail="Could not validate token")
 
 
-def get_current_user(
-    token: dict[str, Any] | None = Depends(validate_creds),
-    session: Session = Depends(get_db),
-) -> UserFromDB:
-    """Get the current user from the JWT token."""
-    if token is None:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    with session.begin():
-        user = session.query(UserOld).get(token["sub"])
-
-    return UserFromDB.from_orm(user)
+async def get_user_db(session: AsyncSession = Depends(get_async_session)):
+    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)
