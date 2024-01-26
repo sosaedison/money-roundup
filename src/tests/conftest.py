@@ -1,9 +1,13 @@
 import os
+from typing import Any, AsyncGenerator
+from unittest.mock import patch
 
+import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
-from pytest import fixture
+
+from moneyroundup.users import UserManager
 
 os.environ["ENV"] = "TEST"
 
@@ -13,8 +17,7 @@ from moneyroundup.settings import get_settings  # noqa: E402
 
 settings = get_settings()
 
-
-@fixture
+@pytest.fixture
 def client():
     client = TestClient(app)
     yield client
@@ -38,3 +41,34 @@ def decode_token(token: str) -> str:
         key=get_secret_value(settings.APP_SECRET_KEY),
         algorithms=settings.JWT_ALGORITHM,
     )["sub"]
+
+
+@pytest.fixture
+def new_user() -> dict[str, str]:
+    return {"email": "sosarocks@test.com", "password": "Sosa"}
+
+@pytest_asyncio.fixture
+async def create_new_user(async_client: AsyncClient, user: dict[str, str]) -> AsyncGenerator[Any, Any]:
+    """Create a new user."""
+    with patch.object(UserManager, "on_after_register", return_value=None):
+        reg_res = await async_client.post("/api/auth/register", json=user)
+
+    assert reg_res.status_code == 201
+
+    client_res = await async_client.post(
+        "/api/auth/jwt/login",
+        data={"username": user["email"], "password": user["password"]},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+    assert client_res.status_code == 200
+
+    # get the access token
+    access_token = client_res.json()["access_token"]
+
+    # get the user from the database
+    client_res = await async_client.get(
+        "/api/auth/users/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    yield client_res.json()

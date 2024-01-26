@@ -6,10 +6,9 @@ from fastapi_users.db import (SQLAlchemyBaseOAuthAccountTableUUID,
                               SQLAlchemyBaseUserTableUUID,
                               SQLAlchemyUserDatabase)
 from sqlalchemy import create_engine
-from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, sessionmaker
 
 from moneyroundup.settings import get_settings
 
@@ -30,7 +29,6 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     # )
     first_name: Mapped[str]
     last_name: Mapped[str]
-    goal: Mapped[dict] = mapped_column("goal", JSON, nullable=True)
 
     def __str__(self) -> str:
         return f"USER({self.first_name} | {self.email} | {self.is_active})"
@@ -73,6 +71,4 @@ async def get_async_session_context_manager():
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)
-    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)
     yield SQLAlchemyUserDatabase(session, User, OAuthAccount)
