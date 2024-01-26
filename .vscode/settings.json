@@ -1,12 +1,19 @@
 {
   "python.analysis.typeCheckingMode": "basic",
-  "python.testing.pytestArgs": ["src"],
+  "python.testing.pytestArgs": [
+    "src"
+  ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "cSpell.words": ["boto", "botocore", "httpx", "UUIDID"],
+  "cSpell.words": [
+    "boto",
+    "botocore",
+    "httpx",
+    "UUIDID"
+  ],
   "peacock.color": "green",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "charliermarsh.ruff"
   },
   "python.formatting.provider": "black",
   "workbench.colorCustomizations": {

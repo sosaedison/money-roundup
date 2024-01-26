@@ -61,5 +61,12 @@ class LinkTokenForUser(BaseModel):
     link_token: str
     user_id: str
 
-class Goal(BaseModel):
-    goal: list[dict[str, str]]
+
+class NewGoal(BaseModel):
+    user_id: str
+    goal: dict[str, str | int]
+
+
+class GoalUpdate(BaseModel):
+    id: str
+    goal: dict[str, str | int]

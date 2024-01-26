@@ -1,7 +1,9 @@
+from uuid import uuid4
+
 from fastapi_users.db import (
     SQLAlchemyBaseUserTableUUID,
 )
-from sqlalchemy import JSON, ForeignKey, Integer, String
+from sqlalchemy import JSON, UUID, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from moneyroundup.database import Base
@@ -32,6 +34,6 @@ class Item(Base):
 class Goal(Base):
     __tablename__ = "goals"
 
-    id: Mapped[int] = mapped_column("id", Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column("user_id", String, ForeignKey("user.id"))
-    goal: Mapped[dict] = mapped_column("goal", JSON, nullable=True)
+    id: Mapped[str] = mapped_column(primary_key=True, default=str(uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("user.id"))
+    goal: Mapped[dict] = mapped_column(JSON, nullable=True)

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 from fastapi_users.db import SQLAlchemyBaseOAuthAccountTableUUID
 from sqlalchemy import create_engine
@@ -44,7 +44,7 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 @asynccontextmanager
-async def get_async_session_context_manager():
+async def get_async_session_context_manager() -> AsyncGenerator[Any, Any]:
     async with AsyncSession(async_engine, expire_on_commit=False) as session:
         try:
             yield session
@@ -53,4 +53,3 @@ async def get_async_session_context_manager():
             raise e
         finally:
             await session.close()
-
