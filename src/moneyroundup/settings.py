@@ -117,8 +117,12 @@ class ProdSettings(Settings):
 class TestSettings(Settings):
     """Settings for Test Environment"""
 
-    DB_CONNECTION_STRING: str = "sqlite:///test_moneyroundup.db"
-    DB_CONNECTION_STRING_ASYNC: str = "sqlite+aiosqlite:///test_async__moneyroundup.db"
+    DB_CONNECTION_STRING: str = os.getenv(
+        "AWSSECRET_DB_CONNECTION_STRING", "postgresql+asyncpg://moneyroundup:password@db:5432/moneyroundup"
+    )
+    DB_CONNECTION_STRING_ASYNC: str = os.getenv(
+        "AWSSECRET_DB_CONNECTION_STRING_ASYNC", "postgresql+aiosqlite://moneyroundup:password@db:5432/moneyroundup"
+    )
     DB_ECHO: bool = True
 
 

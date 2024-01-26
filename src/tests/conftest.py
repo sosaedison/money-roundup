@@ -17,6 +17,8 @@ from moneyroundup.settings import get_settings  # noqa: E402
 
 settings = get_settings()
 
+print(settings)
+
 @pytest.fixture
 def client():
     client = TestClient(app)
@@ -48,16 +50,16 @@ def new_user() -> dict[str, str]:
     return {"email": "sosarocks@test.com", "password": "Sosa"}
 
 @pytest_asyncio.fixture
-async def create_new_user(async_client: AsyncClient, user: dict[str, str]) -> AsyncGenerator[Any, Any]:
+async def create_new_user(async_client: AsyncClient, new_user: dict[str, str]) -> AsyncGenerator[Any, Any]:
     """Create a new user."""
     with patch.object(UserManager, "on_after_register", return_value=None):
-        reg_res = await async_client.post("/api/auth/register", json=user)
+        reg_res = await async_client.post("/api/auth/register", json=new_user)
 
     assert reg_res.status_code == 201
 
     client_res = await async_client.post(
         "/api/auth/jwt/login",
-        data={"username": user["email"], "password": user["password"]},
+        data={"username": new_user["email"], "password": new_user["password"]},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
 

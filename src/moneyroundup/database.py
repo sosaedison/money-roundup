@@ -8,7 +8,7 @@ from fastapi_users.db import (SQLAlchemyBaseOAuthAccountTableUUID,
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
-from sqlalchemy.orm import DeclarativeBase, Mapped, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, sessionmaker, mapped_column
 
 from moneyroundup.settings import get_settings
 
@@ -27,8 +27,8 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     # oauth_accounts: Mapped[List[OAuthAccount]] = relationship(
     #     "OAuthAccount", lazy="joined"
     # )
-    first_name: Mapped[str]
-    last_name: Mapped[str]
+    first_name: Mapped[str] = mapped_column(nullable=True)
+    last_name: Mapped[str] = mapped_column(nullable=True)
 
     def __str__(self) -> str:
         return f"USER({self.first_name} | {self.email} | {self.is_active})"

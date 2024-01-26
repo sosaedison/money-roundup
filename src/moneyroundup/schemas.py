@@ -30,9 +30,6 @@ class UserFromDB(BaseModel):
     last_name: str
     profile_pic_url: str | None = None
 
-    class Config:
-        from_attributes = True
-
 
 class LoggedInUser(BaseModel):
     email: str

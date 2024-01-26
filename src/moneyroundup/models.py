@@ -1,5 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from moneyroundup.database import Base
@@ -36,4 +35,4 @@ class Goal(Base):
 
     id: Mapped[int] = mapped_column("id", Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column("user_id", String, ForeignKey("user.id"))
-    goal: Mapped[dict] = mapped_column("goal", JSONB, nullable=True)
+    goal: Mapped[dict] = mapped_column("goal", JSON, nullable=True)

@@ -22,6 +22,8 @@ services:
       retries: 3
 
   backend:
+    profiles:
+      - dev
     container_name: moneyroundup_backend
     restart: always
     env_file:
@@ -45,6 +47,23 @@ services:
     ports:
       - 8080:8080
       - 5678:5678
+
+  tests:
+    profiles:
+      - tests
+    container_name: moneyroundup_tests
+    entrypoint: ./run_tests.sh
+    image: backend
+    build:
+      context: ./src
+      dockerfile: ./Dockerfile
+    networks:
+      - moneyroundup_net
+    volumes:
+      - ./src:/home/app
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pg_data:
