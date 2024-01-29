@@ -88,11 +88,6 @@
   resolved "https://registry.npmjs.org/@swc/core-darwin-arm64/-/core-darwin-arm64-1.3.64.tgz"
   integrity sha512-gSPld6wxZBZoEvZXWmNfd+eJGlGvrEXmhMBCUwSccpuMa0KqK7F6AAZVu7kFkmlXPq2kS8owjk6/VXnVBmm5Vw==
 
-"@swc/core-darwin-x64@1.3.64":
-  version "1.3.64"
-  resolved "https://registry.npmjs.org/@swc/core-darwin-x64/-/core-darwin-x64-1.3.64.tgz"
-  integrity sha512-SJd1pr+U2pz5ZVv5BL36CN879Pn1V0014uVNlB+6yNh3e8T0fjUbtRJcbFiBB+OeYuJ1UNUeslaRJtKJNtMH7A==
-
 "@swc/core@^1.3.61":
   version "1.3.64"
   resolved "https://registry.npmjs.org/@swc/core/-/core-1.3.64.tgz"
