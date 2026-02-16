@@ -1,5 +1,7 @@
 import os
+from uuid import uuid4
 
+import jwt
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
@@ -19,17 +21,16 @@ def client():
 
 @pytest_asyncio.fixture
 async def async_client():
-    """Create a test client for the app."""
-    from moneyroundup.main import app
-
     async with AsyncClient(app=app, base_url="http://localhost:8000") as ac:
         yield ac
 
 
-def decode_token(token: str) -> str:
-    """Decode a JWT token and return the user id."""
-    from jose import jwt
-
-    return jwt.decode(
-        token, settings.APP_SECRET_KEY, algorithms=settings.JWT_ALGORITHM
-    )["sub"]
+def make_test_token(user_id: str | None = None, email: str = "test@example.com") -> str:
+    """Create a valid Supabase-style JWT for testing."""
+    payload = {
+        "sub": user_id or str(uuid4()),
+        "email": email,
+        "aud": "authenticated",
+        "role": "authenticated",
+    }
+    return jwt.encode(payload, settings.SUPABASE_JWT_SECRET, algorithm="HS256")

@@ -26,6 +26,13 @@ const router = createBrowserRouter([
     path: "/forgot-password",
     element: <ForgotPassword />,
   },
+  {
+    // Supabase redirects here after email verification/password reset.
+    // The SDK picks up the token from the URL hash automatically,
+    // then onAuthStateChange in Root fires. Redirect to home.
+    path: "/auth/callback",
+    element: <Root />,
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

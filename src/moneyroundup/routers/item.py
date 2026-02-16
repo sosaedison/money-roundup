@@ -1,33 +1,24 @@
-from uuid import uuid4
-
 from fastapi import APIRouter, Depends, HTTPException
 
-from moneyroundup.database import get_async_session_context_manager
-from moneyroundup.models import Item
+from moneyroundup.auth import SupabaseUser, get_current_user
 from moneyroundup.schemas import CreateNewItem
-from moneyroundup.users import current_active_user
+from moneyroundup.supabase_client import supabase
 
 router = APIRouter(prefix="/item", tags=["Item"])
 
 
 @router.post("", status_code=201)
-async def create_item(
+def create_item(
     payload: CreateNewItem,
-    session=Depends(get_async_session_context_manager),
-    user=Depends(current_active_user),
+    user: SupabaseUser = Depends(get_current_user),
 ):
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    i = Item(
-        id=str(uuid4()),
-        access_token=payload.access_token,
-        user_id=payload.user_id,
-        active=True,
+    result = (
+        supabase.table("items")
+        .insert({"user_id": user.id, "access_token": payload.access_token})
+        .execute()
     )
 
-    async with session as session:
-        session.add(i)
-        await session.commit()
+    if not result.data:
+        raise HTTPException(status_code=500, detail="Failed to create item")
 
-    return {"item_created": True, "user_id": payload.user_id}
+    return {"item_created": True, "user_id": user.id}

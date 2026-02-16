@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import "./UserAuthModal.css";
 
 interface UserAuthModalProps {
-  handleSignUp: (e: React.FormEvent) => void;
-  handleSignIn: (e: React.FormEvent) => void;
-  routeToForgotPassword?: (e: React.FormEvent) => void;
+  handleSignUp: (email: string, password: string) => void;
+  handleSignIn: (email: string, password: string) => void;
+  routeToForgotPassword?: () => void;
 }
 
 const UserAuthModal: React.FC<UserAuthModalProps> = ({
@@ -18,13 +18,23 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({
     setIsSignUp(value);
   };
 
-  // prefill email if provided in URL from email verification success
-  let userEmail: string | null | undefined = new URLSearchParams(
-    window.location.search
-  ).get("email");
-  if (userEmail === null) {
-    userEmail = undefined;
-  }
+  const onSignIn = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement)
+      .value;
+    handleSignIn(email, password);
+  };
+
+  const onSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement)
+      .value;
+    handleSignUp(email, password);
+  };
 
   return (
     <div className="flex items-center bg-zinc-900">
@@ -45,23 +55,28 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({
         </div>
         <div className="form-container">
           {!isSignUp ? (
-            <form onSubmit={handleSignIn} className="form">
+            <form onSubmit={onSignIn} className="form">
+              <input name="email" type="email" placeholder="Email" required />
               <input
-                type="email"
-                placeholder="Email"
-                value={userEmail}
+                name="password"
+                type="password"
+                placeholder="Password"
                 required
               />
-              <input type="password" placeholder="Password" required />
               <button type="submit">Sign In</button>
               <button type="button" onClick={routeToForgotPassword}>
                 Forgot Password?
               </button>
             </form>
           ) : (
-            <form onSubmit={handleSignUp} className="form">
-              <input type="email" placeholder="Email" required />
-              <input type="password" placeholder="Password" required />
+            <form onSubmit={onSignUp} className="form">
+              <input name="email" type="email" placeholder="Email" required />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                required
+              />
               <input type="password" placeholder="Confirm Password" required />
               <button type="submit">Sign Up</button>
             </form>

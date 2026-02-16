@@ -1,52 +1,32 @@
-import os
-from unittest.mock import patch
-
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
 
-from moneyroundup.database import create_db_and_tables, drop_db_and_tables
-from moneyroundup.users import UserManager
-
-
-@pytest_asyncio.fixture(scope="function", autouse=True)
-async def rest_db():
-    """Reset the database before each test."""
-    await drop_db_and_tables()
-    await create_db_and_tables()
+from tests.conftest import make_test_token
 
 
 @pytest.mark.asyncio
-async def test_user_register_and_access_their_info(async_client: AsyncClient):
-    """Test that a user can register and get a JWT token and then use that token to access their info."""
+async def test_me_with_valid_token(async_client: AsyncClient):
+    token = make_test_token(email="sosarocks@test.com")
 
-    # define a user
-    new_user: dict[str, str] = {"email": "sosarocks@test.com", "password": "Sosa"}
-
-    # register the user
-    with patch.object(UserManager, "on_after_register", return_value=None):
-        client_res = await async_client.post("/api/auth/register", json=new_user)
-
-    # assert that the user was created
-    assert client_res.status_code == 201
-
-    # login with the new user
-    client_res = await async_client.post(
-        "/api/auth/jwt/login",
-        data={"username": new_user["email"], "password": new_user["password"]},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    res = await async_client.get(
+        "/api/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert client_res.status_code == 200
+    assert res.status_code == 200
+    assert res.json()["email"] == "sosarocks@test.com"
 
-    # get the access token
-    access_token = client_res.json()["access_token"]
 
-    # get the user from the database
-    client_res = await async_client.get(
-        f"/api/auth/users/me",
-        headers={"Authorization": f"Bearer {access_token}"},
+@pytest.mark.asyncio
+async def test_me_with_no_token(async_client: AsyncClient):
+    res = await async_client.get("/api/auth/me")
+    assert res.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_me_with_invalid_token(async_client: AsyncClient):
+    res = await async_client.get(
+        "/api/auth/me",
+        headers={"Authorization": "Bearer invalid-token"},
     )
-    registered_user = client_res.json()
-
-    assert registered_user["email"] == new_user["email"]
+    assert res.status_code == 401
