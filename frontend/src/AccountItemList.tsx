@@ -1,21 +1,15 @@
-import {Component, ReactElement} from 'react'
 import AccountItem from "./AccountItem"
-import { AccountItemType } from './AppTypes'
 
 interface Props {
-    accounts: any[]
-    toggleActive?: Function
+  accounts: { name: string }[]
 }
 
-
-export default function AccountItemList({accounts, toggleActive}: Props){
-
-    return (
-        <>
-            {accounts.map((accountItem, index) => {
-                return <AccountItem key={index} name={accountItem.name} />
-            })}
-        </>
-        
-    )
+export default function AccountItemList({ accounts }: Props) {
+  return (
+    <div className="space-y-3">
+      {accounts.map((accountItem, index) => (
+        <AccountItem key={index} name={accountItem.name} />
+      ))}
+    </div>
+  )
 }

@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "../supabaseClient";
 
 export default function ForgotPassword() {
@@ -7,16 +12,11 @@ export default function ForgotPassword() {
   const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
-    // If the URL contains a recovery token (via hash fragment from Supabase),
-    // the SDK will automatically pick it up and establish a session.
-    // We just need to detect that we're in "reset" mode.
     const params = new URLSearchParams(window.location.search);
-    const type = params.get("type");
-    if (type === "recovery") {
+    if (params.get("type") === "recovery") {
       setRequesting(false);
     }
 
-    // Also check hash params (Supabase sends tokens in the hash)
     const hashParams = new URLSearchParams(
       window.location.hash.replace("#", "?")
     );
@@ -30,9 +30,9 @@ export default function ForgotPassword() {
       redirectTo: `${window.location.origin}/forgot-password?type=recovery`,
     });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
-      alert("Password reset email sent. Check your inbox.");
+      toast.success("Password reset email sent. Check your inbox.");
     }
   }
 
@@ -41,39 +41,71 @@ export default function ForgotPassword() {
       password: newPassword,
     });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
-      alert("Password successfully reset!");
+      toast.success("Password successfully reset!");
       window.location.href = "/";
     }
   }
 
   return (
-    <>
-      {requesting && (
-        <div>
-          <h1>Forgot Password</h1>
-          <p>Enter your email below to reset your password.</p>
-          <input
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            placeholder="Email"
-          />
-          <button onClick={handleForgotPassword}>Reset Password</button>
-        </div>
-      )}
-      {!requesting && (
-        <div>
-          <h1>Please enter your new password</h1>
-          <input
-            onChange={(e) => setNewPassword(e.target.value)}
-            type="password"
-            placeholder="New Password"
-          />
-          <input type="password" placeholder="Confirm New Password" />
-          <button onClick={handleResetPassword}>Submit</button>
-        </div>
-      )}
-    </>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        {requesting ? (
+          <>
+            <CardHeader>
+              <CardTitle>Forgot Password</CardTitle>
+              <CardDescription>Enter your email below to reset your password.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <Button onClick={handleForgotPassword} className="w-full">
+                Reset Password
+              </Button>
+              <Button variant="link" className="w-full" onClick={() => (window.location.href = "/")}>
+                Back to Sign In
+              </Button>
+            </CardContent>
+          </>
+        ) : (
+          <>
+            <CardHeader>
+              <CardTitle>Reset Password</CardTitle>
+              <CardDescription>Please enter your new password.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  type="password"
+                  placeholder="New Password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm New Password"
+                />
+              </div>
+              <Button onClick={handleResetPassword} className="w-full">
+                Submit
+              </Button>
+            </CardContent>
+          </>
+        )}
+      </Card>
+    </div>
   );
 }

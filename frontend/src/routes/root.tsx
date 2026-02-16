@@ -1,9 +1,10 @@
 import { Session } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import AccountItemList from "../AccountItemList";
-import "../App.css";
 import PlaidLink from "../PlaidLink";
-import UserAuthModal from "../UserAuthModal";
+import { AuthCard } from "@/components/AuthCard";
+import { Layout } from "@/components/Layout";
 import { supabase } from "../supabaseClient";
 
 import {
@@ -21,12 +22,10 @@ export default function Root() {
   const [accounts, setAccounts] = useState<{ name: string }[]>([]);
 
   useEffect(() => {
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Listen for auth state changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -37,7 +36,6 @@ export default function Root() {
   }, []);
 
   const accessToken = session?.access_token;
-  const userID = session?.user?.id;
   const email = session?.user?.email;
 
   const onSuccess: PlaidLinkOnSuccess = useCallback(
@@ -111,9 +109,9 @@ export default function Root() {
   async function handleSignUp(email: string, password: string) {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
-      alert("Check your email for a verification link!");
+      toast.success("Check your email for a verification link!");
     }
   }
 
@@ -123,7 +121,7 @@ export default function Root() {
       password,
     });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   }
 
@@ -131,24 +129,25 @@ export default function Root() {
     window.location.href = "/forgot-password";
   }
 
-  return (
-    <div className="App">
-      {!session && (
-        <UserAuthModal
-          handleSignUp={handleSignUp}
-          handleSignIn={handleSignIn}
-          routeToForgotPassword={routeToForgotPassword}
-        />
-      )}
+  if (!session) {
+    return (
+      <AuthCard
+        handleSignUp={handleSignUp}
+        handleSignIn={handleSignIn}
+        routeToForgotPassword={routeToForgotPassword}
+      />
+    );
+  }
 
-      {session && (
-        <>
-          <p>Signed in as {email}</p>
-          <button onClick={handleSignOut}>Sign Out</button>
+  return (
+    <Layout email={email} onSignOut={handleSignOut}>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Linked Accounts</h2>
           <PlaidLink ready={ready} open={open} />
-          <AccountItemList accounts={accounts} />
-        </>
-      )}
-    </div>
+        </div>
+        <AccountItemList accounts={accounts} />
+      </div>
+    </Layout>
   );
 }
